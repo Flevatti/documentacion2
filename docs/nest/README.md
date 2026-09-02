@@ -2,9 +2,10 @@
 sidebar_position: 1
 ---
 # Nest
-- Es un framework que está desarrollado con typescript para crear aplicaciones web backend.
-- Combina elementos de programación funcional, POO y programación reactiva.
-- Aplica los conceptos de Angular, pero en el backend.
+* Es un framework de **backend** desarrollado con **TypeScript** que utiliza **Node.js**.
+* Permite crear aplicaciones y **APIs** aplicando conceptos de **Angular**.
+* Utiliza **módulos**, **controladores** y **servicios**.
+
 
 ## Comandos
 - Instalamos el CLI para gestionar los proyectos de Next.js con el siguiente comando:
@@ -37,56 +38,67 @@ nest start --watch
 ```
 
 ## Estructura de archivos
-- Carpeta dist: Acá esta todo el código Javascript que se ejecuta en un servidor.
-- Carpeta src: Aca esta ubicado todo el código de backend.
-- Carpeta test: Sirve para crear test para probar toda la aplicación.
-- tsconfig.json: Para configurar las reglas bases de Typescript
-- tsconfig.build.json : Sirve para configurar “reglas extras” que se aplican en producción.
+* **Carpeta `dist`**: Contiene el código JavaScript generado a partir del código TypeScript.
+* **Carpeta `src`**: Contiene el código que se ejecuta en el servidor.
+* **Carpeta `test`**: Contiene los archivos utilizados para realizar pruebas de la aplicación.
+* **`tsconfig.json`**: Permite configurar **TypeScript**.
+* **`tsconfig.build.json`**: Permite modificar la configuración de **TypeScript**. Esta configuración solo se utiliza durante el proceso de compilación.
 
-:::warning Iconos de Angular
-- En Visual studio code en algunos archivos esta el icono de Angular.
-- Para arreglarlo:
-    - Pulsamos F1
-    - Escribimos: Open Workspace Settings
-    - En el json, escribimos lo siguiente:
+
+
+:::warning Iconos de NestJS
+
+En **Visual Studio Code**, algunos archivos pueden mostrar el icono de **Angular**.
+
+Para solucionarlo:
+
+1. Pulsamos `F1`.
+2. Escribimos **Open Workspace Settings (JSON)**.
+3. Agregamos la siguiente configuración:
+
 ```json
 {
     "material-icon-theme.activeIconPack": "nest"
 }
-
 ```
 :::
 
 
-## Archivos de Nest.js
-#### Modulo
-- Una Aplicación NEST consiste en un conjunto de módulos.
-- Un módulo en NestJS es como una caja donde guardas todo lo relacionado con una parte específica de tu aplicación. Por ejemplo, si estás creando una aplicación que maneja usuarios, podrías tener un módulo que agrupe todo lo necesario para trabajar con los usuarios: cómo manejarlos, qué hacer cuando alguien se registra, etc. Este módulo se encarga de mantener todo lo relacionado con los usuarios bien organizado y fácil de encontrar.
-- Un módulo se enfoca en manejar la lógica de una tarea específica dentro de la aplicación, como la autenticación, la gestión de productos o de usuarios, manteniendo cada tarea separada de las demás.
-Cada módulo contiene:
-    - controller
-    - service
-    - dto
-    - interceptor
-    - etc
+
+## Archivos de NestJS
+#### Módulo
+* Una aplicación de **NestJS** está formada por un conjunto de módulos.
+* Un módulo agrupa todo lo relacionado con una parte específica de la aplicación, como usuarios, productos o autenticación.
+* Cada módulo puede contener:
+  * **Controller**
+  * **Service**
+  * **DTO**
+  * **Interceptor**
+  * **Etc.**
+
 #### Controller
-- Contiene funciones que se van a ejecutar cuando una url es visitada.
-- [Mas información](https://flevatti.github.io/documentacion/docs/C--/API#controlador-teoria)
+
+* Contiene funciones que se ejecutan cuando se accede a una URL.
+* [Más información](https://flevatti.github.io/guide-software-development/docs/CSharp/API#controlador-teoria)
 
 #### Service
-- Son funciones que se pueden utilizar en diferentes controladores.
-- Contiene la lógica reutilizable.
 
+* Contiene funciones que pueden ser utilizadas por diferentes controladores.
+* Contiene la lógica reutilizable de la aplicación.
 
 #### DTO
--  Contiene la descripción de cómo se van a recibir los datos en el backend.
 
-#### Interceptors
-- Son funciones que se ejecutan antes o despues del controlador.
+* Son como "objetos" que especifican qué datos son visibles al usuario.
+* [Más información](https://flevatti.github.io/guide-software-development/docs/CSharp/API#dto-teoria)
+
+#### Interceptor
+
+* Contiene funciones que se ejecutan antes o después de una función del controlador.
+* Son similares a los middlewares.
 
 
 :::tip
-- los archivos que terminan en .spec.ts en NestJS son específicamente para probar y asegurarse de que el módulo y sus componentes funcionen correctamente. Estos archivos contienen pruebas automatizadas que ayudan a verificar que el código se comporte como se espera.
+Los archivos que terminan en `.spec.ts` en **NestJS** se utilizan para realizar pruebas y verificar que los módulos y sus componentes funcionen correctamente.
 :::
 
 ## Archivos principales
@@ -106,9 +118,9 @@ export class AppModule {}
 ```
 
 :::tip Observación
-- Este es el módulo que utiliza la aplicación de Nest.JS para construir e iniciar la aplicación.
-- Este es el módulo que va a contener todos los módulos, controladores, servicios, etc que va a tener la aplicación.
-- Contiene un controlador que gestiona las solicitudes y un proveedor que básicamente su función es “importar funciones” de un servicio para que el controlador la pueda usar.
+* Este es el módulo que utiliza **NestJS** para ejecutar e iniciar la aplicación.
+* Es el módulo que contiene los demás módulos, controladores, servicios, etc. que utiliza la aplicación.
+* Contiene un **Controller** que gestiona las solicitudes y un **Service** que contiene las funciones que puede utilizar el controlador.
 :::
 
 ```js title="main.ts"
@@ -126,9 +138,9 @@ export class AppModule {}
 ```
 
 :::tip Observación
-- Es el archivo que arranca la aplicación.
-- La función NestFactory.create() crea la app y como parámetro recibe el módulo principal que se va a usar en el proceso de compilación y ejecución.
-- Con el método listen() la aplicación empieza a escuchar en el puerto que le especificamos.
+* Es el archivo que crea y ejecuta la aplicación.
+* La función `NestFactory.create()` crea la aplicación y recibe como parámetro el módulo principal que se va a utilizar (el que vimos anteriormente).
+* Con el método `listen()` especificamos el puerto que va a utilizar la aplicación para recibir solicitudes.
 :::
 
 

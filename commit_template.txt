@@ -1,0 +1,51 @@
+type(scope): subject
+
+body?
+
+footer?
+
+# === INSTRUCTIONS ===
+
+# Type:
+# Mandatory
+# Specifies the type of change
+# Available options:
+# feat: Add new documentation, page, section, or feature
+# fix: Fix an error or incorrect information
+# docs: Update or improve existing documentation
+# style: Visual or formatting changes without content changes
+# refactor: Reorganize documentation or project structure without changing its behavior
+# perf: Improve website performance
+# test: Add or update tests
+# chore: Maintenance tasks or dependency updates
+# build: Changes to the build process or Docusaurus configuration
+# ci: Changes to CI/CD workflows or automation
+# deployment: Deployment-related changes
+# revert: Revert a previous commit
+
+# ----------------------------------------------------------
+
+# Scope:
+# Optional; specifies the part of the project affected
+# Use a short, descriptive name (lowercase, kebab-case)
+# Examples: javascript, sql, docker, git, tools, config
+
+# ----------------------------------------------------------
+
+# Subject:
+# Mandatory; summarizes the change
+# Limit to 50 characters
+# Capitalize and do not end with a period
+# Use imperative mood: If applied, this commit will [subject]
+
+# ----------------------------------------------------------
+
+# Body:
+# Optional; provides details and context of the change
+# Limit to 72 characters per line
+# Answer: What changed and why?
+
+# ----------------------------------------------------------
+
+# Footer:
+# Optional; includes references (issues, breaking changes, etc.)
