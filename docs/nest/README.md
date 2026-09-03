@@ -118,40 +118,48 @@ export class AppModule {}
 ```
 
 :::tip Observación
-* Este es el módulo que utiliza **NestJS** para ejecutar e iniciar la aplicación.
+* Este es el módulo principal que utiliza **NestJS** para ejecutar e iniciar la aplicación.
 * Es el módulo que contiene los demás módulos, controladores, servicios, etc. que utiliza la aplicación.
 * Contiene un **Controller** que gestiona las solicitudes y un **Service** que contiene las funciones que puede utilizar el controlador.
 :::
 
 ```js title="main.ts"
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
 
-@Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
-})
-export class AppModule {}
-
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3000);
+}
+bootstrap();
 ```
 
 :::tip Observación
 * Es el archivo que crea y ejecuta la aplicación.
-* La función `NestFactory.create()` crea la aplicación y recibe como parámetro el módulo principal que se va a utilizar (el que vimos anteriormente).
+* La función `NestFactory.create()` crea la aplicación y recibe como parámetro el módulo principal que se va a utilizar (el que vimos anteriormente) para ejecutar e iniciar la aplicación.
 * Con el método `listen()` especificamos el puerto que va a utilizar la aplicación para recibir solicitudes.
 :::
 
 
-## Modulo
-- Un módulo es una clase con el decorador @Module el cual proporciona metadatos que Nest utiliza para organizar la estructura de la aplicación.
-- Cada aplicación tiene al menos un módulo, un módulo raíz. El módulo raíz es el punto de partida que utiliza Nest para crear el gráfico de la aplicación: la estructura de datos interna que utiliza Nest para resolver las relaciones y dependencias entre módulos y proveedores. Si bien, en teoría, las aplicaciones muy pequeñas pueden tener solo el módulo raíz, este no es el caso típico. Queremos enfatizar que los módulos son muy recomendables como una forma eficaz de organizar los componentes. Por lo tanto, para la mayoría de las aplicaciones, la arquitectura resultante empleará varios módulos, cada uno de los cuales encapsulará un conjunto de capacidades estrechamente relacionadas.
-- El decorador  @Module() toma un único objeto cuyas propiedades describen el módulo:
-    - providers:	Los “servicios” que utilizara el modulo.
-    - controllers:	Los “controladores” que usara el modulo.
-    - imports:	Una lista de módulos que se importaran a este módulo. Lo que se importa sobre todo son los proveedores de otros módulos para poder usarlo en este. El Módulo principal deberá importar todos los módulos que va a usar la aplicación.
-    - exports:	Una lista de “providers” de este módulo. Especifica los providers que se exportan para que otros modulos los pueden usar al importar.
+
+## Módulo
+* Un módulo es una clase que utiliza el decorador `@Module()`. Este decorador proporciona información que **NestJS** utiliza para crear la aplicación y su estructura.
+* Cada aplicación tiene al menos un módulo, llamado **módulo raíz** o **módulo principal**. Este módulo es utilizado por **NestJS** para crear la aplicación.
+* Cuando nos referimos a la estructura de la aplicación, hablamos de:
+  * Cómo se comunican los diferentes módulos entre sí para lograr algo.
+  * La idea es que sean independientes, pero que puedan interactuar entre ellos.
+* Si vamos a **React** o **Vue**, podemos pensar en un módulo como un componente que se encarga de algo específico y es independiente.
+* El decorador `@Module()` recibe un objeto con diferentes propiedades:
+  * **providers**: Los servicios que utilizará el módulo.
+  * **controllers**: Los controladores que utilizará el módulo.
+  * **imports**: Los módulos que se importarán en este módulo.
+  * **exports**: Los providers que podrán ser utilizados por otros módulos.
+
+
+
+
+
+
 
 #### Crear módulo
 
@@ -160,12 +168,12 @@ export class AppModule {}
 nest generate module [nombreModulo]
 ```
 :::tip Observación
-- Al ejecutar el comando, se creará una carpeta en src que contendrá toda la lógica que usara el módulo (al principio estará vacía pero cuando le añadas controladores, servicios, etc se llenara).
+* Al ejecutar el comando, se creará una carpeta dentro de `src` que contendrá toda la lógica que utilizará el módulo. Al principio estará vacía, pero cuando se agreguen controladores, servicios, etc., se irá llenando.
 :::
 
 
 :::tip
-- Para que desaparezcan los errores de Eslint si usamos Windows, escribimos lo siguiente en .eslintrc , debajo del apartado de rules:
+* Para que desaparezcan los errores de **ESLint** al utilizar **Windows**, escribimos lo siguiente en `.eslintrc`, debajo del apartado `rules`:
 
 ```json
   rules: {
@@ -184,7 +192,7 @@ nest generate module [nombreModulo]
 ```
 :::
 
-- El archivo que representa el módulo termina en .module.ts y contiene lo siguiente:
+* El archivo que representa al módulo termina en `.module.ts` y contiene lo siguiente:
 ```js
 import { Module } from '@nestjs/common';
 
@@ -194,10 +202,10 @@ export class TasksModule {}
 
 ```
 :::tip Observación
-- Es una clase con un decorador que contiene un objeto vacio (sin metadatos).
+* Es una clase con un decorador que contiene un objeto vacío (sin metadatos).
 :::
 
-- El app.module.ts :
+* El archivo `app.module.ts`:
 ```js
 
 import { Module } from '@nestjs/common';
@@ -210,12 +218,11 @@ export class AppModule {}
 
 ```
 :::tip Observación
-- La propiedad imports del decorador recibe un array con todos los módulos que se “importara”.
-- La propiedad imports se utiliza para traer otros módulos que el módulo actual necesita para funcionar. Es como decirle al módulo: "Para hacer mi trabajo, necesito usar las funcionalidades de estos otros módulos."
-- La propiedad imports en un módulo de NestJS se utiliza para importar otros módulos que contienen los proveedores que el módulo actual necesita. Cuando un módulo es importado a través de imports, sus proveedores se vuelven accesibles para ser inyectados en los componentes del módulo que realiza la importación.
-- En este caso el módulo principal importa el módulo TasksModule para que se pueda utilizar en la aplicación.
-- Es importante importar todos los módulos que se van a utilizar en la aplicación en el módulo principal.
-
+* La propiedad `imports` recibe un array con todos los módulos que se van a importar.
+* La propiedad `imports` se utiliza para traer otros módulos que el módulo actual necesita para funcionar. Es como decirle al módulo: "Para hacer mi trabajo, necesito utilizar las funcionalidades de estos otros módulos".
+* Cuando importamos un módulo, podemos utilizar los **providers** que este módulo exporta.
+* En este caso, el módulo principal importa `TasksModule` para que sus funcionalidades puedan utilizarse en la aplicación.
+* Es importante importar en el módulo principal todos los módulos que se van a utilizar en la aplicación.
 :::
 
 ## Controlador
@@ -224,8 +231,8 @@ export class AppModule {}
 nest generate controller [NombreController]
 ```
 :::tip Observación
-- Si lo creas con el mismo nombre que el módulo, se crea en la carpeta asignada al módulo y hace las configuraciones correspondientes en este.
-- El comando genera dos archivos: uno que termina en controller.ts (el controlador) y otro que termina en spec.ts (para testear el controlador).
+* Si lo creamos con el mismo nombre que el módulo, se creará dentro de la carpeta del módulo y se realizarán las configuraciones correspondientes en este.
+* El comando genera dos archivos: uno que termina en `.controller.ts`, que corresponde al controlador, y otro que termina en `.spec.ts`, que se utiliza para realizar pruebas del controlador.
 :::
 
 - El controlador se vería así:
@@ -237,7 +244,8 @@ export class TasksController {}
 
 ```
 :::tip Observación
-- Es una clase con un decorador que recibe como parámetro el nombre del controlador (representa la ruta base para las peticiones HTTP que el módulo gestionara).
+- Es una clase con un decorador que recibe como parámetro el nombre del controlador, que representa la ruta base.
+- Es decir, todas las peticiones que vayan a `servidor/nombreControlador` serán gestionadas por este controlador.
 :::
 
 - Y en el módulo que tiene el mismo nombre, lo añadimos (él  comando lo hace solo):
@@ -258,7 +266,7 @@ export class TasksModule {}
 
 
 ## Asignar endpoint
-- A través de la clase del controlador, podemos asignar varios endpoint (rutas) que va a gestionar ese controlador:
+- A través de la clase del controlador, podemos asignar varios endpoints (rutas) que gestionará ese controlador:
 
 ```js
 import { Controller, Get } from '@nestjs/common';
@@ -275,10 +283,10 @@ export class TasksController {
 
 ```
 :::tip Observación
-- getAllTask es una función se ejecuta durante la petición GET http://localhost:3000/tasks.
-- Su decorador especifica el tipo de petición (GET, POST, DELETE, ETC) y su parámetro la ruta (endpoint) que va a gestionar ese método.  Acordate que se concatena con la ruta base (nombre del controlador). 
-- Al especificar ‘/’ estamos diciéndole que sea la ruta base (nombre controlador).
-- Cada método de la clase controlador se suele llamar endpoint. El método en si es lo que se ejecuta cuando hacemos una petición al endpoint.
+- `getAllTask` es una función que se ejecuta durante la petición `GET http://localhost:3000/tasks`.
+- Su decorador especifica el tipo de petición (`GET`, `POST`, `DELETE`, etc.) y su parámetro indica la ruta (endpoint) que va a gestionar ese método. Recordemos que esta ruta se concatena con la ruta base (nombre del controlador).
+- Al especificar `/`, estamos indicando que el método utilizará la ruta base (nombre del controlador).
+- Cada método de la clase controlador se suele llamar endpoint. El método en sí es lo que se ejecuta cuando hacemos una petición al endpoint.
 :::
 
 
@@ -327,22 +335,31 @@ export class TasksController {
 
 ## Servicio
 #### Proveedores
-- Proveedores son un concepto clave en NestJS. Se refiere a cualquier clase que pueda ser inyectada como una dependencia (el concepto se denomina inyección de dependencia) dentro de otra clase. Los proveedores incluyen servicios, repositorios, fábricas, ayudantes, y otras clases que se usan para cumplir una función específica dentro de la aplicación.
-- La idea principal detrás de un proveedor es que permite establecer relaciones entre diferentes objetos de la aplicación de manera automática y eficiente, delegando la responsabilidad de "conectar" estos objetos al sistema de ejecución de Nest.
-- NestJS usa un patrón de diseño llamado inyección de dependencias, que facilita la gestión de dependencias. Gracias a TypeScript, Nest puede resolver y gestionar estas dependencias simplemente por tipo, lo que simplifica el código y reduce errores.
+- Los proveedores son un concepto clave en **NestJS**. Se refiere a cualquier clase que pueda ser utilizada como una dependencia dentro de otra clase. Es decir, son clases que pueden ser importadas para su posterior uso.
+- Los proveedores pueden ser llamados **servicios, repositorios, fábricas, ayudantes** (según cómo se crean) y se utilizan para proporcionar funciones específicas que pueden utilizar diferentes módulos.
+- **NestJS** utiliza la **inyección de dependencias** para conectar estas clases automáticamente. De esta forma, una clase puede utilizar las funciones de otra clase sin tener que crearla directamente.
+
+:::tip Dependencia dentro de otras clases
+- Una clase puede tener dependencias.
+- Las dependencias son "clases" que la clase necesita utilizar para poder ejecutar una función correctamente.
+- Es como decir: "Necesitamos las instancias de estas clases" para poder ejecutar el código.
+:::
+
 
 #### Servicio
-- Son un tipo específico de proveedor en NestJS. Se encargan de contener la lógica de negocio de la aplicación. Los servicios realizan tareas como acceder a bases de datos, interactuar con APIs externas, realizar cálculos, entre otras.
-- Al ser proveedores, los servicios pueden ser inyectados en otros componentes, como controladores o incluso otros servicios, utilizando el sistema de inyección de dependencias de Nest.
-- La inyección de dependencias en NestJS permite que los servicios se conecten fácilmente con otros componentes de la aplicación, lo que mejora el modularidad y facilita el mantenimiento del código.
-- Un servicio en NestJS es una clase que contiene lógica reutilizable. Esto significa que agrupa funciones o métodos que realizan tareas específicas y que pueden ser usadas en diferentes partes de la aplicación. En lugar de repetir la misma lógica en múltiples lugares, puedes definirla una vez en un servicio y luego simplemente "llamar" a ese servicio desde cualquier parte de la aplicación que lo necesite.
+- Son un tipo específico de proveedor en **NestJS**. Se encargan de contener funciones que realizan tareas específicas dentro de la aplicación, como acceder a bases de datos, interactuar con APIs externas, realizar cálculos, entre otras.
+- Al ser proveedores, los servicios pueden ser inyectados en otros componentes, como controladores o incluso otros servicios, utilizando el sistema de **inyección de dependencias** de **NestJS**.
+- Cuando nos referimos a que los servicios pueden ser inyectados en otros componentes, hablamos de que estos componentes pueden utilizar las funciones del servicio inyectado.
+- Un servicio en **NestJS** es una clase que contiene código reutilizable. Esto significa que agrupa funciones o métodos que realizan tareas específicas relacionadas entre sí y que pueden ser utilizadas en diferentes partes de la aplicación. En lugar de repetir el mismo código en múltiples lugares, podemos definirlo una vez en un servicio y luego utilizar ese servicio desde cualquier parte de la aplicación que lo necesite.
 
 #### Inyección de dependencia
-- Inyección de Dependencias es un patrón de diseño que se usa para gestionar las dependencias entre clases en una aplicación. En NestJS, esto se realiza a través del sistema de inyección de dependencias que facilita la creación y gestión de instancias de clases.
-- Entonces la inyección de dependencia tiene tres conceptos:
-  - Instancias Inyectables: Te permite utilizar instancias (que corresponden a una clase que sea inyectable (especificado por su decorador)) para realizar operaciones.
-  - Uso de funciones/Métodos: Básicamente estas importando “funciones/métodos” que ya algún proveedor (servicio, por ejemplo) las creo para usarlas.
-  - Constructor: Estas “instancias” el programador las especifica en el constructor de la clase y Nest.js se encarga de crearlas y gestionarla para que las puedas usar. Lo único que necesita Nest para saber que instanciar es el tipo de dato de la clase inyectable que se necesita.
+- La **inyección de dependencias** es un patrón de diseño que se utiliza para gestionar las dependencias de las clases en una aplicación. En **NestJS**, esto se realiza a través del sistema de inyección de dependencias que facilita la creación y gestión de instancias de clases.
+- Entonces, la inyección de dependencia tiene tres conceptos:
+  - **Instancias inyectables:** Te permite utilizar instancias de una clase que sea inyectable (una clase es inyectable cuando tiene el decorador `@Injectable`) para realizar operaciones.
+  - **Uso de funciones/métodos:** Básicamente, estás importando funciones o métodos que algún proveedor (servicio, por ejemplo) creó para usarlas.
+  - **Constructor:** Estas instancias (dependencias) las especifica el programador en el constructor de la clase y **NestJS** se encarga de crearlas y gestionarlas para que las puedas usar. Lo único que necesita **NestJS** para saber qué instanciar es el nombre de la clase inyectable que se necesita. Es como decirle a **NestJS**: "Para esta clase, necesito que me crees instancias que correspondan a X clase inyectable".
+
+
 #### Ejemplo para entenderlo
 - El comando para crear un servicio es:
 
@@ -350,9 +367,9 @@ export class TasksController {
 nest generate service [NombreServicio]
 ```
 :::tip Observación
-- Si lo creas con el mismo nombre que el módulo, se crea en la carpeta asignada al módulo y hace las configuraciones correspondientes en este.
-- Un servicio es un archivo que termina en “.service.ts” 
-- También generara uno que termina en spec.ts (para testear el servicio).
+- Si lo creas con el mismo nombre que el módulo, se creará en la carpeta asignada al módulo y se realizarán las configuraciones correspondientes en este.
+- Un servicio es un archivo que termina en `.service.ts`.
+- También generará uno que termina en `.spec.ts`, que se utiliza para realizar pruebas del servicio.
 :::
 
 - Entonces en el servicio:
@@ -372,11 +389,10 @@ export class TasksService {
 
 ```
 :::tip Observación
-- La clase está decorada con el decorador Inyectable para que se pueda acceder a los métodos que contenga desde otras partes de la aplicación
-
+- La clase está decorada con el decorador `@Injectable()` para que se pueda acceder a los métodos que contiene desde otras partes de la aplicación.
 :::
 
-- En el módulo tenemos que configurar que proveedor se va a usar (el comando lo hace solo):
+- En el módulo tenemos que configurar qué proveedor se va a utilizar (el comando lo hace automáticamente):
 ```js
 import { Module } from '@nestjs/common';
 import { TasksController } from './tasks.controller';
@@ -391,8 +407,8 @@ export class TasksModule {}
 
 ```
 :::tip Observación
-- providers es un array que recibe las diferentes clases inyectables (contiene el decorador @ Injectable) que pueden usar todos los componentes del módulo.
-- Ahora podemos usar una instancia de la clase Inyectable en el controlador TasksController.
+- `providers` es un array que recibe las diferentes clases inyectables (contienen el decorador `@Injectable()`) que pueden utilizar todos los componentes del módulo.
+- Ahora podemos utilizar una instancia de la clase inyectable en el controlador `TasksController`.
 :::
 
 - Ahora usemos la clase inyectable en el controlador (es un componente del módulo y por lo tanto la puede usar):
@@ -419,11 +435,11 @@ export class TasksController {
 
 ```
 :::tip Observación
-- En los parámetros del constructor especificamos las clases inyectables que necesitamos, esto se realiza mediante el tipo de dato.
-- Cuando se inicia la aplicación, Nest.js utiliza los tipos de datos que especificamos en el constructor, para generar las instancias de las clases inyectables que especificamos.
-- Se podría decir que Nest.js se la ingenia para invocar al constructor que especificamos con los “parámetros” que declaramos.
-- Nest.js busca en el array providers del módulo para encontrar una clase que coincida con el tipo de dato especificado en el constructor. Si la encuentra, crea una instancia de la clase encontrada en el array providers y la pasa al constructor de la clase que la necesita. Si no la encuentra, NestJS no podrá proporcionar una instancia para ese tipo. Como resultado, la aplicación fallará al intentar crear una instancia del controlador o servicio que lo requiere, generando un error.
-- Entonces en este ejemplo Nest.js genera la instancia de la clase inyectable, invoca el constructor con la instancia y nosotros se la asignamos a la variable taskService para poder usarla en el endpoint.
+- En los parámetros del constructor especificamos las clases inyectables que necesitamos. Esto se realiza mediante el tipo de dato.
+- Cuando se inicia la aplicación, **NestJS** utiliza los tipos de datos que especificamos en el constructor para generar las instancias de las clases inyectables que especificamos.
+- Se podría decir que **NestJS** se las ingenia para invocar al constructor que especificamos con los “parámetros” que declaramos.
+- **NestJS** busca en el array `providers` del módulo una clase que coincida con el tipo de dato especificado en el constructor. Si la encuentra, crea una instancia de la clase encontrada en el array `providers` y la pasa al constructor de la clase que la necesita. Si no la encuentra, **NestJS** no podrá proporcionar una instancia para ese tipo. Como resultado, la aplicación fallará al intentar crear una instancia del controlador o servicio que la requiere, generando un error.
+- Entonces, en este ejemplo, **NestJS** genera la instancia de la clase inyectable, invoca el constructor con la instancia y nosotros se la asignamos a la variable `taskService` para poder usarla en el endpoint.
 :::
 
 
@@ -472,10 +488,8 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Con la palabra reservada “private” le decimos a Nest que nos cree una variable llamada taskService (nombre del parámetro) que contenga la instancia de la clase inyectable que estamos solicitando.
+- Con la palabra reservada `private` le decimos a **NestJS** que nos cree una variable llamada `taskService` (nombre del parámetro) que contenga la instancia de la clase inyectable que estamos solicitando.
 - De esta manera nos ahorramos lógica en el constructor.
-
-
 :::
 
 ## Response
@@ -484,13 +498,12 @@ export class TasksController {
 
 
 #### 1- Por defecto (Lo maneja Nest)
-- Si se devuelve un objeto o un array, se serializa automáticamente en JSON. Sin embargo cuando se devuelve un tipo primitivo de Javascript (String , number , boolean , etc) , Nest enviara solo el valor sin intentar serializarlo.
-- El código de estado de la respuesta siempre es 200 de forma predeterminada, excepto para las solicitudes POST que usan 201. Aunque esto podemos cambiarlo con el decorador @HttpCode().
-- Si lanzas un error que no corresponda a uno que maneja Nest (“throw new Error”) acabas con la ejecución del programa y como como respuesta devuelves el código de estado  500.
-
+- Si se devuelve un objeto o un array, **NestJS** lo serializa (convierte) automáticamente en JSON. Sin embargo, cuando se devuelve un tipo primitivo de JavaScript (`String`, `number`, `boolean`, etc.), **NestJS** envía solo el valor sin intentar serializarlo.
+- El código de estado de la respuesta siempre es `200` de forma predeterminada, excepto para las solicitudes `POST`, que utilizan `201`. Esto se puede cambiar con el decorador `@HttpCode()`.
+- Si lanzas un error que no corresponda a uno que maneja **NestJS** (`throw new Error()`), se detiene la ejecución y se devuelve como respuesta el código de estado `500`.
 
 #### 2- Utilizar la sintaxis de express
-- A través de decoradores podemos acceder a los típicos objetos que manejamos en Express (req , res , next , req.session , req,params , etc).
+- A través de los decoradores podemos acceder a los típicos objetos que manejamos en **Express** (`req`, `res`, `next`, `req.session`, `req.params`, etc.).
 - [Mas información.](https://docs.nestjs.com/controllers#request-object)
 - Ejemplo:
 
@@ -516,7 +529,7 @@ export class TasksController {
 :::
 
 #### Métodos de respuesta
-- Existen varios métodos que brindan Nest que te permiten devolver una respuesta con un código de estado diferente al “por defecto”.
+- Existen varios métodos que ofrece **NestJS** que permiten devolver una respuesta con un código de estado diferente al **predeterminado**.
 - Por ejemplo:
 ```js
    @Get('/')
@@ -526,8 +539,8 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Lanzas una excepción con el método NotFoundException() que la maneja Nest para devolver una respuesta con el código de estado 404 con un mensaje (el que especificamos en el parámetro).
-- [¡Existe un método para cada código de estado asique te invito a investigar!](https://docs.nestjs.com/exception-filters#built-in-http-exceptions)
+- El método `NotFoundException()` lanza una excepción (error) que **NestJS** maneja para devolver una respuesta con el código de estado `404` y un mensaje (el que especificamos en el parámetro).
+- [¡Existe un método para cada código de estado, así que te invito a investigar!](https://docs.nestjs.com/exception-filters#built-in-http-exceptions)
 :::
 
 
@@ -542,13 +555,13 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Con el decorador @HttpCode(X) especificamos que el código de estado de la respuesta debe ser X.
-- En este ejemplo remplazamos el código de estado por defecto (que en este caso seria 200) por el 404.
+- Con el decorador `@HttpCode(X)` especificamos que el código de estado de la respuesta debe ser `X`.
+- En este ejemplo reemplazamos el código de estado por defecto (que en este caso sería `200`) por el `404`.
 :::
 
 #### HttpException
-- HttpException es una clase que se utiliza para lanzar excepciones que maneja Nest para generar una respuesta a una petición HTTP.
-- Cuando quieres devolver una respuesta con un código de error específico (como 404, 403, 500, etc.), puedes usar HttpException para hacerlo de manera sencilla. Esta clase te permite controlar tanto el mensaje como el código de estado de la respuesta.
+- `HttpException` es una clase que se utiliza para lanzar excepciones (errores) que **NestJS** maneja para generar una respuesta a una petición HTTP.
+- Cuando quieres devolver una respuesta con un código de error específico (como `404`, `403`, `500`, etc.), puedes usar `HttpException` para hacerlo de manera sencilla. Esta clase te permite controlar tanto el mensaje como el código de estado de la respuesta.
 - Ejemplo:
 ```js
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Post, Put} from '@nestjs/common';
@@ -564,10 +577,10 @@ export class TasksController {
 
 ```
 :::tip Observación
-- En este ejemplo, se lanza una excepción que genera una respuesta HTTP con el código 403 (Forbidden) y el mensaje "Mensaje".
-- Parametros de HttpException:
-  - 1: El mensaje de error que será devuelto al cliente en la respuesta HTTP. Puede ser un string simple, y es lo que el usuario verá como parte del cuerpo de la respuesta.
-  - 2: El código de estado que indica el tipo de error. En este caso, HttpStatus.FORBIDDEN es equivalente al código 403. NestJS proporciona una enumeración (HttpStatus) que facilita el uso de códigos de estado HTTP en lugar de escribir directamente los números (por ejemplo, 403 para "Forbidden").
+- En este ejemplo, se lanza una excepción que genera una respuesta HTTP con el código `403` (Forbidden) y el mensaje `"Mensaje"`.
+- Parámetros de `HttpException`:
+  - **1:** El mensaje de error que será devuelto al cliente en la respuesta HTTP. Puede ser un string simple y es lo que el usuario verá como parte del cuerpo (body) de la respuesta.
+  - **2:** El código de estado que indica el tipo de error. En este caso, `HttpStatus.FORBIDDEN` es equivalente al código `403`. **NestJS** proporciona un enum (`HttpStatus`) para acceder a los códigos de estado HTTP en lugar de escribir directamente los números (por ejemplo, `403` para "Forbidden").
 :::
 
 - También puedes personalizar más la respuesta, incluyendo un objeto con información adicional:
@@ -585,16 +598,15 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Parametros de HttpException:
-  - 1: Un objeto que contiene más información que un simple mensaje:
-    - status: Define el código de estado HTTP (en este caso, HttpStatus.FORBIDDEN o 403).
-    - error: Este es un mensaje más personalizado, que puede incluir más detalles sobre el error.
-    - Puedes agregar otros campos en este objeto, según lo que quieras devolver al cliente. El objeto será convertido a JSON y enviado como parte de la respuesta HTTP.
-  - 2: Código de estado HTTP (HttpStatus.FORBIDDEN):
-    -  Al igual que en el primer ejemplo, este es el código de estado HTTP.
-    -  Aunque ya se indicó el código en el objeto de respuesta, se vuelve a pasar como un segundo parámetro porque HttpException siempre espera recibir explícitamente el código de estado aquí.
-
-- [Mas información en su sitio web.](https://docs.nestjs.com/exception-filters)
+- Parámetros de `HttpException`:
+  - **1:** Un objeto que contiene más información que un simple mensaje:
+    - `status`: Define el código de estado HTTP (en este caso, `HttpStatus.FORBIDDEN` o `403`).
+    - `error`: Es un mensaje más personalizado, que puede incluir más detalles sobre el error.
+    - Puedes agregar otros campos en este objeto, según lo que quieras devolver al cliente. El objeto será convertido a JSON y enviado como respuesta HTTP.
+  - **2:** Código de estado HTTP (`HttpStatus.FORBIDDEN`):
+    - Al igual que en el primer ejemplo, este es el código de estado HTTP.
+    - Aunque ya se indicó el código en el objeto, se vuelve a pasar como segundo parámetro porque `HttpException` siempre espera recibir explícitamente el código de estado aquí.
+- [Más información en su sitio web.](https://docs.nestjs.com/exception-filters)
 :::
 
 
@@ -624,7 +636,7 @@ export class TasksController {
 
 ```
 :::tip Observación
-- El parámetro que tiene el decorador @Body() contiene el valor de req.body.
+- El parámetro que tiene el decorador `@Body()` contiene el valor de `req.body`.
 :::
 
 ## Query
@@ -645,11 +657,11 @@ export class TasksController {
 
 ```
 :::tip Observación
-- El parámetro que tiene el decorador @Query() contiene el valor de req.query
+- El parámetro que tiene el decorador `@Query()` contiene el valor de `req.query`.
 :::
 ## Params
-- Cuando especificamos el endpoint (url) en el decorador que indica el tipo de petición, podemos usar el signo “:” para crear params.
-- La sintaxis es “:nombreParams” al igual que en Express.js:
+- Cuando especificamos el endpoint (URL) en el decorador que indica el tipo de petición, podemos usar el signo `:` para crear parámetros (params).
+- La sintaxis es `:nombreParametro`, al igual que en **Express.js**:
 ```js
   @Get('/:id')
   getTask(@Param() param ){
@@ -659,8 +671,7 @@ export class TasksController {
 
 ```
 :::tip Observación
-- El parámetro que tiene el decorador @Param() contiene el valor de req.params.
-
+- El parámetro que tiene el decorador `@Param()` contiene el valor de `req.params`.
 :::
 
 - Aunque podemos acceder a un valor directamente de esta manera:
@@ -673,19 +684,18 @@ export class TasksController {
 
 ```
 :::tip Observación
-- El decorador @Param() recibe como parámetro el nombre del param que se quiere acceder, en este ejemplo sería algo como req.params.id.
-- Podes realizar lo mismo con los decoradores anterior (@body y @query).
-
-
+- El decorador `@Param()` recibe como parámetro el nombre del param al que se quiere acceder. Por ejemplo, si tenemos un endpoint como `tasks/:id`, podemos utilizar `@Param('id')` para acceder al valor de `req.params.id`.
+- De esta forma, `@Param('id')` nos permite obtener únicamente el valor del param `id`, en lugar de obtener todos los parámetros de `req.params`.
+- Se puede realizar lo mismo con los decoradores anteriores (`@Body()` y `@Query()`), especificando el nombre de la propiedad a la que queremos acceder.
 :::
 
 ## Dto y Validación
 #### Dto
-- El DTO es una interface o clase para especificar:
-  -	Qué es lo que esperamos recibir 
-  -	Que información debe ser “expuesta” al usuario.
-- Un DTO describe un objeto que contiene solo los datos necesarios para una operación específica, sin incluir lógica de negocio ni comportamiento. 
-- Por lo general creas una carpeta llamada dto dentro de la carpeta del modulo que la va a usar y creas los archivos con nombres como nombreDto.dto.ts
+- El DTO es una interfaz o clase que se utiliza para especificar:
+  - Qué datos esperamos recibir.
+  - Qué información debe ser "expuesta" al usuario.
+- Un DTO es un objeto que contiene solo los datos necesarios para realizar una operación específica, sin incluir lógica de negocio.
+- Por lo general, se crea una carpeta llamada `dto` dentro de la carpeta del módulo que la va a utilizar. Dentro de esta carpeta se crean archivos con nombres como `nombreDto.dto.ts`.
 - Ejemplo: 
 ```js title="task/dto/create-task.dto.ts"
 export interface createTaskDto {
@@ -705,7 +715,7 @@ export class createTaskDto {
 
 ```
 
- - Y en los servicios o controladores los usas para especificar qué tipos de datos esperamos recibir o incluso que tipo vamos a retornar para la respuesta:
+- Y en los servicios o controladores los usamos para especificar qué tipos de datos esperamos recibir o incluso qué tipo de dato vamos a retornar como respuesta:
  ```js
 import { createTaskDto } from './dto/create-task.dto';
 @Controller('tasks')
@@ -727,20 +737,20 @@ export class TasksController {
    }
 
  ```
- :::tip Observación
-- Si lo probaste te darás cuenta que solo estamos usando las opciones que nos brinda Typescript para mejorar nuestro autocompletado, pero no hay ninguna validación.
- :::
+:::tip Observación
+- Si lo probaste, te darás cuenta de que solo estamos utilizando las opciones que nos brinda **TypeScript** para mejorar nuestro autocompletado, pero no hay ninguna validación.
+:::
 
 
  #### Validación
 - Podemos usar las DTO para crear las validaciones. 
-- Para realizar las validaciones usaremos dos paquete que nos recomienda Nest: class-validator y class-transformer.
+- Para realizar las validaciones, usaremos dos paquetes que nos recomienda **NestJS**: `class-validator` y `class-transformer`.
 - [Mas información.](https://docs.nestjs.com/techniques/validation)
 
 
 
 ##### Especificar validaciones
-- Ahora podemos usar los decoradores que nos brindan class-validator en una DTO para especificar validaciones (NO IMPLEMENTAR):
+- Ahora podemos usar los decoradores que nos brinda `class-validator` en un DTO para especificar las validaciones que queremos realizar (NO IMPLEMENTAR):
 ```js
 import { IsString, MinLength } from "class-validator"
 
@@ -759,11 +769,11 @@ export class createTaskDto {
 ```
 :::tip Observación
 - [Ver listado de decoradores.](https://github.com/typestack/class-validator#validation-decorators).
-- Al implementar validaciones, es obligatorio que cada campo contenga un decorador que especifique el tipo de dato, como @IsString(). De lo contrario, no serán reconocidos como campos.
+- Al especificar validaciones, es obligatorio que cada campo contenga un decorador que especifique el tipo de dato, como `@IsString()`. De lo contrario, no serán reconocidos como campos y no se validarán.
 :::
 
 ##### Implementar validaciones
-- Ahora nos queda implementar las validaciones que especificamos en el dto, en este caso haremos que nuestro controlador utilice las validaciones:
+- Ahora nos queda implementar las validaciones que especificamos en el DTO. En este caso, haremos que nuestro controlador utilice las validaciones:
 
 ```js
 import { Body, Controller, Delete, Get, NotFoundException, Patch, Post, Put, UsePipes, ValidationPipe} from '@nestjs/common';
@@ -789,16 +799,16 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Con el decorador @UsePipes(new ValidationPipe()) implementamos la validación para el método especifico.
-- @UsePipes es un decorador que indica a Nest que utilice una tubería (una clase que implementa la interfaz PipeTransform) para transformar o validar los datos de entrada (lo veremos más tarde).
-- new ValidationPipe() crea una instancia de la clase ValidationPipe, que es una tubería incorporada en Nest que realiza la validación basada en los metadatos de validación (por ejemplo, decoradores como @IsString(), @MinLength(), etc.) que se especificó en la dto.
-- La tubería ValidationPipe en NestJS utiliza class-validator para realizar la validación de los datos de entrada.
+- Con el decorador `@UsePipes(new ValidationPipe())` implementamos la validación para el método específico.
+- `@UsePipes` es un decorador que indica a **NestJS** que utilice una tubería (una clase que implementa la interfaz `PipeTransform`) para transformar o validar los datos de entrada (lo veremos más adelante).
+- `new ValidationPipe()` crea una instancia de la clase `ValidationPipe`, que es una tubería incorporada en **NestJS** que realiza la validación definida en los metadatos (decoradores) que especificamos en el DTO, como `@IsString()`, `@MinLength()`, etc.
+- La tubería `ValidationPipe` de **NestJS** utiliza `class-validator` para realizar la validación de los datos de entrada.
 - La validación se realiza de la siguiente manera:
-  1.	Nest crea una instancia de la clase ValidationPipe.
-  2.	La tubería ValidationPipe analiza los metadatos (decoradores) de validación aplicados a los datos de una dto(en este caso, createTaskDto).
-  3.	La tubería ValidationPipe verifica si los datos de entrada cumplen con las reglas de validación definidas en los metadatos.
-  4.	Si los datos de entrada son válidos, la tubería ValidationPipe devuelve los datos de entrada sin modificarlos.
-  5.	Si los datos de entrada son inválidos, la tubería ValidationPipe lanza una excepción ValidationException que es manejada por Nest devolviendo una respuesta con código de estado 400 y indicando los errores de validaciones.
+  1. **NestJS** crea una instancia de la clase `ValidationPipe`.
+  2. La tubería `ValidationPipe` analiza los metadatos (decoradores) de validación que contiene el DTO (en este caso, `CreateTaskDto`).
+  3. La tubería `ValidationPipe` verifica si los datos de entrada cumplen con las validaciones definidas en los metadatos.
+  4. Si los datos de entrada son válidos, la tubería `ValidationPipe` devuelve los datos de entrada sin modificarlos.
+  5. Si los datos de entrada son inválidos, la tubería `ValidationPipe` lanza una excepción de validación que es manejada por **NestJS**, devolviendo una respuesta con código de estado `400` e indicando los errores de validación.
 :::
 
 - También podemos hacer que se apliquen validaciones en toda la aplicación, sin importa que controlador sea.
@@ -817,13 +827,13 @@ bootstrap();
 
 ```
 :::tip Observación
-- En lugar de usar el decorador @UsePipes, usamos el método useGlobalPipes que contiene la aplicación que se crea.
-- Con el método useGlobalPipes le indicamos a Nest que use una tubería en toda la aplicación (en todas las peticiones básicamente).
-- De esta manera las validaciones se van a implementar en todas las peticiones de la aplicación en la que se utilizan una DTO con validaciones.
+- En lugar de usar el decorador `@UsePipes()`, podemos utilizar el método `useGlobalPipes()`, que lo contiene la aplicación que creamos.
+- Con el método `useGlobalPipes()` le indicamos a **NestJS** que utilice una tubería en toda la aplicación, es decir, en todas las peticiones que reciba.
+- De esta manera, las validaciones se van a implementar en todas las peticiones de la aplicación en las que se utilice un DTO que tenga validaciones.
 :::
 
 ##### Whitelist
-- Podemos configurar la tubería ValidationPipe() para que elimine los campos o propiedades que no figuren en el DTO.
+- Podemos configurar la tubería `ValidationPipe()` para que elimine los campos o propiedades que no figuren en el DTO.
 - Para esto hacemos lo siguiente:
 ```js
   app.useGlobalPipes(new ValidationPipe({
@@ -832,7 +842,8 @@ bootstrap();
 
 ```
 :::tip Observación
-- ValidationPipe puede aceptar un objeto con varias opciones. Cuando configuras whitelist en true, automáticamente elimina cualquier propiedad que no esté definida en el DTO (Data Transfer Object). Esto ayuda a asegurar que solo los datos esperados pasen a las funciones de los controladores, aumentando la seguridad y limpieza del proceso de validación.
+- `ValidationPipe` puede aceptar un objeto con varias opciones. Cuando configuramos `whitelist` en `true`, automáticamente elimina cualquier propiedad que no esté definida en el DTO (Data Transfer Object).
+- Esto ayuda a asegurar que solo pasen los datos esperados al controlador.
 :::
 
 - Ahora  hacemos una petición a http://localhost:3000/tasks con el siguiente body:
@@ -849,14 +860,17 @@ bootstrap();
 - Una tubería sirve para modificar o validar datos antes de que llegue al controlador (lo veremos más adelante).
 :::
 
+
 ## Pipe
-- Un Pipe (tubería) es una clase con el decorador @Injectable(), la cual implementa la interface PipeTransform.
-- Los pipes en NestJS tienen dos usos principales:
-  1.	Transformación: Convierte los datos de entrada en el formato deseado. Por ejemplo, podrías convertir un dato que te llega como texto (string) en un número entero (integer).
-  2.	Validación: Evalúa los datos de entrada para ver si son correctos. Si los datos son válidos, se dejan pasar tal cual; si no, el pipe genera un error.
-- En ambos casos, los pipes funcionan sobre los parámetros (datos) que recibe un método del controlador (la información que llega a una ruta específica de tu aplicación). Antes de que el método del controlador se ejecute, NestJS coloca un pipe(tubería), para que reciba los datos, los transforme o los valide, y luego pase esos datos al controlador. Es en este momento cuando ocurre cualquier transformación o validación, y después, el método del controlador se llama con los parámetros modificados (si es necesario).
-- NestJS ya incluye varios pipes predefinidos que puedes usar directamente. También puedes crear tus propios pipes personalizados.
-En resumen, los pipes interceptan los datos antes de que lleguen al método del controlador, los validan o transforman, y luego los pasan al método del controlador. 
+- Un Pipe (tubería) es una clase con el decorador `@Injectable()`, la cual implementa la interfaz `PipeTransform`.
+- Los Pipes en **NestJS** tienen dos usos principales:
+  1. **Transformación:** Convierte los datos de entrada al formato deseado. Por ejemplo, podemos convertir un dato que llega como texto (`string`) en un número entero (`integer`).
+  2. **Validación:** Evalúa los datos de entrada para comprobar si son correctos. Si los datos son válidos, se dejan pasar; si no, el Pipe genera un error.
+- En ambos casos, los Pipes se aplican a los parámetros (datos) de un método del controlador, es decir, a la información que el usuario le envía al servidor.
+- **NestJS** utiliza Pipes (tuberías) para recibir los datos que el usuario envía al servidor, transformarlos o validarlos y, luego, pasarlos al controlador.
+- **NestJS** ya incluye varios Pipes predefinidos que podemos utilizar directamente. También podemos crear nuestros propios Pipes personalizados.
+
+En resumen, los Pipes reciben los datos antes de que lleguen al método del controlador, los validan o transforman y, luego, los pasan al método del controlador.
 
 #### ¿Por qué se llaman tubería?
 - Comparar un pipe con una "tubería" viene de cómo funcionan: tal como una tubería transporta agua de un punto a otro, los pipes en NestJS "transportan" los datos de entrada hacia el método del controlador. Durante este proceso, pueden "filtrar" los datos (validándolos) o "modificarlos" (transformándolos) antes de que lleguen a su destino.
@@ -882,9 +896,9 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Los valores que recibimos por param generalmente son String asique usamos el pipe ParseIntPipe que viene de Nest para convertir el valor en int.
-- Como puedes ver en el segundo parámetro de algunos decoradores podés especificar los pipes a aplicar para ese dato en específico.
-- En este caso estamos aplicando una tubería solo para el dato que contiene el param number, el valor de number pasa por esta tubería, se aplica una transformación (se vuelve en int) y luego se lo pasa ya transformado al método del controlador.
+- Los valores que recibimos por `param` generalmente son `String`, así que usamos el Pipe `ParseIntPipe`, que viene con **NestJS**, para convertir el valor en `int`.
+- Como puedes ver, en el segundo parámetro de algunos decoradores podemos especificar los Pipes que se van a aplicar a ese dato en específico.
+- En este caso, estamos aplicando una tubería solo para el dato que contiene el `param number`. El valor de `number` pasa por esta tubería, se aplica una transformación (se convierte en `int`) y luego se lo pasa ya transformado al método del controlador.
 :::
 
 - Otro ejemplo convirtiendo el valor en booleano:
@@ -946,24 +960,24 @@ export class ValidatePipe implements PipeTransform {
 
 ```
 :::tip Observación
-- Un pipe debe implementar el  método transform que es el encargado de validar o transformar los datos de entrada antes de que lleguen al método del controlador. Se ejecuta antes de la lógica del controlador y permite modificar o validar datos como el cuerpo de la solicitud (body), los parámetros (params), o las consultas (query), asegurando que la información ingresada cumpla con los requisitos antes de ser procesada.
-- El método transform en un pipe personalizado recibe dos parámetros clave:
-  1.	value: Este es el primer parámetro, y representa los datos de entrada que se desean validar o transformar. Dependiendo de la solicitud HTTP, estos datos pueden provenir del cuerpo de la petición (body), de los parámetros de ruta (params), de las consultas (query), entre otros. Es el objeto principal que el pipe debe manipular o verificar para asegurar que cumpla con los criterios establecidos antes de que llegue al método del controlador.
-  2. metadata: Este es el segundo parámetro, un objeto que contiene información adicional sobre la ejecución del pipe. Incluye detalles como el tipo de dato que se está manejando (por ejemplo, body, query, params) y el tipo de método que lo está recibiendo (si es un método de GET, POST, etc.).
-    - Algunas de sus opciones son:
-      - Metatype: Representa el constructor de la clase que pertenece el parámetro value. Es decir, indica el tipo de dato que se espera para el valor que se está procesando en el pipe. Cuando ves algo como metatype: [Function: Object], significa que el dato recibido en value está siendo interpretado como un objeto genérico, no una instancia de una clase específica. Si no has especificado un tipo de dato concreto para los parámetros del método del controlador, NestJS por defecto asume que el tipo es Object, y por lo tanto el metatype en el pipe será [Function: Object].
-      - Type:  Indica el origen de los datos que está recibiendo el pipe. Los valores pueden ser: query , body , param y header.
-      - Data: Contiene información adicional asociada al parámetro específico que está siendo procesado. Contiene los metadatos que están asociados a decoradores.
-- El método transform en un pipe personalizado devuelve el valor transformado o validado que luego se pasará al método del controlador. Básicamente, lo que el pipe devuelve es lo que finalmente recibe el controlador como parametro.
+* Un Pipe debe implementar el método `transform`, que es el encargado de validar o transformar los datos de entrada antes de que lleguen al método del controlador. Se ejecuta antes de la lógica del controlador y permite modificar o validar datos como el cuerpo de la solicitud (`body`), los parámetros (`params`) o las consultas (`query`), asegurando que la información ingresada cumpla con los requisitos antes de ser procesada.
+* El método `transform` de un Pipe personalizado recibe dos parámetros clave:
+  1. **`value`**: Es el primer parámetro y representa los datos de entrada que se desean validar o transformar. Dependiendo de dónde se use este Pipe, estos datos pueden provenir del cuerpo de la petición (`body`), de los parámetros de ruta (`params`), de las consultas (`query`), entre otros. Es lo que se debe modificar o verificar para asegurar que cumpla con los criterios establecidos antes de que llegue al método del controlador.
+  2. **`metadata`**: Es el segundo parámetro y contiene información sobre el dato (`value`) que está recibiendo el Pipe. Por ejemplo, indica de dónde proviene el dato (`body`, `query`, `params`, etc.), qué tipo de dato es y qué tipo de dato espera recibir el controlador.
+     * Algunas de sus opciones son:
+      - **`metatype`**: Indica el tipo de dato de `value` según el controlador. Por ejemplo, si el parámetro de un método del controlador es de tipo `Number`, `metatype` indicará que se espera un número. Cuando vemos algo como `metatype: [Function: Object]`, significa que el dato recibido en `value` está siendo interpretado como un objeto genérico y no como una instancia de una clase específica. Si no se especifica un tipo concreto para el parámetro del controlador, **NestJS** puede asumir que el tipo es `Object`, por lo que `metatype` será `[Function: Object]`.
+      - **`type`**: Indica de dónde provienen los datos que está recibiendo el Pipe. Puede indicar si los datos vienen de `query`, `body`, `param` o `header`.
+      - **`data`**: Contiene información adicional sobre lo que se está validando o transformando. Esta información es proporcionada por los decoradores que se utilizan en el controlador.
+- El método `transform` de un Pipe personalizado devuelve el valor transformado o validado, que luego se pasará al método del controlador. Básicamente, lo que el Pipe devuelve es lo que finalmente recibe el método del controlador como parámetro.
 - Entonces:
-  -	Si devuelves el valor sin modificarlo: El controlador recibirá el dato tal como fue enviado originalmente en la solicitud.
-  -	Si transformas o validas el valor: El valor modificado o validado será el que llegue al controlador.
-  -	Si los datos no cumplen con ciertas validaciones, puedes lanzar una excepción ([ver Métodos de respuesta](README.md#httpexception)) en lugar de devolver un valor.
+  - Si devuelves el valor sin modificarlo: El método del controlador recibirá el dato tal como fue enviado originalmente en la solicitud.
+  - Si transformas o validas el valor: El valor modificado o validado será el que llegue al método del controlador.
+  - Si los datos no cumplen con ciertas validaciones, puedes lanzar una excepción ([ver Métodos de respuesta](README.md#httpexception)) en lugar de devolver un valor.
 - En este ejemplo:
-  -	Se toma el valor de la propiedad age del objeto value, y se convierte a un número entero con parseInt().
-  -	Si el valor de age no es un número (es decir, si ageNumber es NaN), se lanza una excepción con un código de estado 400 Bad Request utilizando HttpException, devolviendo un mensaje personalizado: 'La edad debe ser un número'.
-  -	Si la conversión es exitosa, se devuelve el objeto original (value), pero con la propiedad age convertida a un número.
-  -	Este pipe se asegura de que el valor de la propiedad age sea un número. Si no lo es, lanza un error HTTP 400 (Bad Request). Si la validación pasa, devuelve el objeto original con age ya convertido a un número.
+  - Se toma el valor de la propiedad `age` del objeto `value` y se convierte a un número entero con `parseInt()`.
+  - Si el valor de `age` no es un número (es decir, si `ageNumber` es `NaN`), se lanza una excepción utilizando `HttpException` para devolver una respuesta con el código de estado `400 Bad Request` y un mensaje personalizado: `'La edad debe ser un número'`.
+  - Si la conversión es exitosa, se devuelve el objeto original (`value`), pero con la propiedad `age` convertida a un número.
+  - De esta forma, el Pipe se asegura de que el valor de `age` sea un número antes de que llegue al método del controlador.
 
 :::
 - Lo implementamos:
@@ -987,8 +1001,18 @@ export class TasksController {
 
 ```
 :::tip Observación
-- En el decorador @Query () especificamos directamente las tuberías(pipe) en el primer parámetro para que se apliquen a TODAS las query. Sucede lo mismo en los otros decoradores.
+- En el decorador `@Query()` especificamos directamente las tuberías (Pipes) en el primer parámetro para que se apliquen a todas las `query`. Sucede lo mismo con los demás decoradores.
 :::
+
+
+:::tip Otras maneras de aplicar tuberías
+- También podemos aplicar tuberías utilizando `@UsePipes()` o el método `useGlobalPipes()`:
+  - **`@UsePipes()`**: Permite aplicar una o varias tuberías a un método específico del controlador. De esta forma, las tuberías se aplicarán solamente cuando se tenga que ejecutar este método.
+    - En este caso, `value` contiene todos los datos que recibe el método del controlador al que se aplicó la tubería.
+  - **`useGlobalPipes()`**: Permite aplicar una o varias tuberías a toda la aplicación. De esta forma, las tuberías se aplicarán a todas las peticiones que reciba la aplicación.
+    - En este caso, `value` contiene todos los datos que recibe cada método del controlador al que se aplique la tubería.
+:::
+
 
 ## Guards
 - Es una clase que implementa el decorador @Inyectable() que implementa la interface CanActivate.
