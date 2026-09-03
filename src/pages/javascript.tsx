@@ -20,7 +20,7 @@ const FeatureList: FeatureType[] = [
     Svg: require('@site/static/img/nestjs.svg').default,
     description: (
       <>
-       Nest.js es un framework backend para Node.js que utiliza TypeScript, enfocado en construir aplicaciones escalables y mantenibles mediante una arquitectura modular y basada en inyección de dependencias.
+    NestJS es un framework de backend que utiliza Node.js y TypeScript, y permite crear aplicaciones y APIs aplicando conceptos de Angular.
       </>
     ),
   },

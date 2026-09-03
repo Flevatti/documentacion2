@@ -21,3 +21,36 @@
   align-items: center;
   justify-content: center;
 }
+
+.hero__guide--title {
+  margin: 2rem 0 0.75rem;
+
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.hero__guide--link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color:#fff;
+  padding: 0.65rem 1.1rem;
+
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+
+  font-weight: 600;
+  text-decoration: none;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.hero__guide--link:hover {
+  color: #fff;
+  background-color: var(--ifm-color-primary);
+  transform: translateX(4px);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+}

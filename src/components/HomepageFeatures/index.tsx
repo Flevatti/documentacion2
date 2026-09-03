@@ -16,12 +16,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require("@site/static/img/logo_js.svg").default,
     description: (
       <>
-        Añade dinamica al sitio web.
-        <br />
-        Es un lenguaje de secuencias de comandos que te permite crear contenido
-        de actualización dinámica, controlar multimedia, animar imágenes y
-        prácticamente todo lo demás. (Está bien, no todo, pero es sorprendente
-        lo que puedes lograr con unas pocas líneas de código JavaScript).
+         Es el lenguaje de programación que hace que una página web sea interactiva (que pueda interactuar con el usuario). Permite ejecutar código en respuesta a las acciones del usuario, cambiar el contenido de la página, validar formularios, crear animaciones y comunicarse con servidores.
       </>
     ),
   },

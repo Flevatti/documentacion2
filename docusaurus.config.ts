@@ -3,20 +3,19 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Documentacion 2',
-  tagline: 'Herramientas y Tecnologias para desarollo web',
+  title: 'Guía para el desarrollo de software 2',
+  tagline: 'Herramientas y Tecnologias para el desarrollo de software 2',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
   url: 'https://flevatti.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/documentacion2/',
+  baseUrl: '/guide-software-development-2/',
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'Flevatti', // Usually your GitHub org/user name.
-  projectName: 'documentacion2', // Usually your repo name.
-
+  projectName: 'guide-software-development-2', // Usually your repo name.
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
