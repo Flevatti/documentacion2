@@ -1,12 +1,12 @@
-import clsx from 'clsx';
-import styles from './styles.module.css';
-import Link from '@docusaurus/Link';
+import clsx from "clsx";
+import styles from "./styles.module.css";
+import Link from "@docusaurus/Link";
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  Svg: React.ComponentType<React.ComponentProps<"svg">>;
   description: JSX.Element;
-  url: string
+  url: string;
 };
 
 const FeatureList: FeatureItem[] = [
@@ -25,10 +25,21 @@ const FeatureList: FeatureItem[] = [
       </>
     ),
   },
-  
+  {
+    title: "Python",
+    url: "/docs/docPython",
+    Svg: require("@site/static/img/logo_python.svg").default,
+    description: (
+      <>
+        Es un lenguaje versátil y poderoso que facilita la creación de
+        aplicaciones, el manejo de datos, la automatización de tareas y mucho
+        más.
+      </>
+    ),
+  },
 ];
 
-function Feature({title, Svg, description , url}: FeatureItem) {
+function Feature({ title, Svg, description, url }: FeatureItem) {
   return (
     <div className={clsx("col col--4")}>
       <div className="text--center">
@@ -48,13 +59,13 @@ function Feature({title, Svg, description , url}: FeatureItem) {
 export default function HomepageFeatures(): JSX.Element {
   return (
     <section className={styles.features}>
-    <div className="container">
-      <div className="row">
-        {FeatureList.map((props, idx) => (
-          <Feature key={idx} {...props} />
-        ))}
+      <div className="container">
+        <div className="row">
+          {FeatureList.map((props, idx) => (
+            <Feature key={idx} {...props} />
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 }
