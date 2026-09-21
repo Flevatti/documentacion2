@@ -965,9 +965,9 @@ export class ValidatePipe implements PipeTransform {
   1. **`value`**: Es el primer parámetro y representa los datos de entrada que se desean validar o transformar. Dependiendo de dónde se use este Pipe, estos datos pueden provenir del cuerpo de la petición (`body`), de los parámetros de ruta (`params`), de las consultas (`query`), entre otros. Es lo que se debe modificar o verificar para asegurar que cumpla con los criterios establecidos antes de que llegue al método del controlador.
   2. **`metadata`**: Es el segundo parámetro y contiene información sobre el dato (`value`) que está recibiendo el Pipe. Por ejemplo, indica de dónde proviene el dato (`body`, `query`, `params`, etc.), qué tipo de dato es y qué tipo de dato espera recibir el controlador.
      * Algunas de sus opciones son:
-      - **`metatype`**: Indica el tipo de dato de `value` según el controlador. Por ejemplo, si el parámetro de un método del controlador es de tipo `Number`, `metatype` indicará que se espera un número. Cuando vemos algo como `metatype: [Function: Object]`, significa que el dato recibido en `value` está siendo interpretado como un objeto genérico y no como una instancia de una clase específica. Si no se especifica un tipo concreto para el parámetro del controlador, **NestJS** puede asumir que el tipo es `Object`, por lo que `metatype` será `[Function: Object]`.
-      - **`type`**: Indica de dónde provienen los datos que está recibiendo el Pipe. Puede indicar si los datos vienen de `query`, `body`, `param` o `header`.
-      - **`data`**: Contiene información adicional sobre lo que se está validando o transformando. Esta información es proporcionada por los decoradores que se utilizan en el controlador.
+          - **`metatype`**: Indica el tipo de dato de `value` según el controlador. Por ejemplo, si el parámetro de un método del controlador es de tipo `Number`, `metatype` indicará que se espera un número. Cuando vemos algo como `metatype: [Function: Object]`, significa que el dato recibido en `value` está siendo interpretado como un objeto genérico y no como una instancia de una clase específica. Si no se especifica un tipo concreto para el parámetro del controlador, **NestJS** puede asumir que el tipo es `Object`, por lo que `metatype` será `[Function: Object]`.
+          - **`type`**: Indica de dónde provienen los datos que está recibiendo el Pipe. Puede indicar si los datos vienen de `query`, `body`, `param` o `header`.
+          - **`data`**: Contiene información adicional sobre lo que se está validando o transformando. Esta información es proporcionada por los decoradores que se utilizan en el controlador.
 - El método `transform` de un Pipe personalizado devuelve el valor transformado o validado, que luego se pasará al método del controlador. Básicamente, lo que el Pipe devuelve es lo que finalmente recibe el método del controlador como parámetro.
 - Entonces:
   - Si devuelves el valor sin modificarlo: El método del controlador recibirá el dato tal como fue enviado originalmente en la solicitud.
@@ -1015,17 +1015,17 @@ export class TasksController {
 
 
 ## Guards
-- Es una clase que implementa el decorador @Inyectable() que implementa la interface CanActivate.
-- La función de un Guard es controlar si una solicitud puede acceder o no a un endpoint (método del controlador) en función de permisos o autenticación:
-  -  Autorización: Se refiere a si el usuario tiene los permisos necesarios para acceder a una ruta específica.
-  -  Autenticación: Normalmente está vinculada con validar la identidad de un usuario mediante tokens o credenciales.
+- Es una clase que tiene el decorador `@Injectable()` y que implementa la interfaz `CanActivate`.
+- La función de un Guard es comprobar si una solicitud puede acceder o no a un endpoint (método del controlador), en función de permisos o autenticación:
+  - **Autorización:** Se refiere a comprobar si el usuario tiene los permisos necesarios para acceder a una ruta específica.
+  - **Autenticación:** Normalmente está relacionada con validar la identidad de un usuario mediante tokens o credenciales.
 
 #### Diferencia con middleware
-- El middleware es una función intermedia que se ejecuta antes que el método del controlador. Sin embargo, el middleware no sabe qué se va a ejecutar después de llamar a next (). Solo hace su tarea y pasa la solicitud, sin importar qué viene después.
-- Los guards son más "inteligentes" que el middleware porque tienen acceso a una instancia llamada ExecutionContext. Esto les da información sobre qué se ejecutará a continuación, después de que el guard termine su trabajo. Esto es importante porque permite a los guards tomar decisiones más precisas basadas en su contexto.
-- Los guards, están diseñados para permitir que coloques lógica específica (como validar permisos) en el momento exacto que se necesita en el ciclo de solicitud/respuesta. Esto mantiene tu código más limpio, sin duplicar lógica en varios lugares (DRY, que significa "Don't Repeat Yourself").
-- Los guards se ejecutan después de que todo el middleware ha hecho su trabajo, pero antes de que entren en juego los interceptores (Interceptors) o las tuberías (pipe). Esto los coloca en una posición ideal para manejar la autorización, ya que pueden decidir si la solicitud debe continuar antes de que se realicen más operaciones en ella.
-- Un buen uso de los guards es controlar el acceso a rutas específicas, donde solo ciertos usuarios (por ejemplo, usuarios autenticados con permisos adecuados) pueden acceder. Un ejemplo común es un AuthGuard, que valida que un token de autenticación esté presente en la solicitud, lo extrae y verifica si el usuario tiene permiso para continuar.
+- El middleware es una función intermedia que se ejecuta antes que el método del controlador. Sin embargo, el middleware no sabe qué se va a ejecutar después de llamar a `next()`. Solo realiza su tarea y pasa la solicitud, sin importar qué viene después.
+- Los Guards son más "inteligentes" que el middleware porque tienen acceso a una instancia llamada `ExecutionContext`. Esto les proporciona información sobre qué se ejecutará a continuación, después de que el Guard termine su trabajo. Esto es importante porque permite a los Guards tomar decisiones más precisas.
+- Los Guards permiten ejecutar lógica específica, como comprobar si el usuario tiene permiso, antes de que se ejecute el método del controlador. De esta forma, evitamos repetir la misma lógica en diferentes partes de la aplicación (DRY, que significa "Don't Repeat Yourself").
+- Los Guards se ejecutan después de que todo el middleware ha hecho su trabajo, pero antes de que entren en juego los interceptores (Interceptors) o las tuberías (Pipes). Esto los coloca en una posición ideal para manejar la autorización, ya que pueden decidir si la solicitud debe continuar antes de que se realicen más operaciones sobre ella.
+- Un buen uso de los Guards es comprobar si el usuario tiene acceso a rutas específicas. Por ejemplo, un `AuthGuard` puede comprobar si el usuario está autenticado y tiene los permisos necesarios para continuar.
 
 #### Crear un guard
 - Para crear un Guard usamos el siguiente comando:
@@ -1033,7 +1033,7 @@ export class TasksController {
 nest generate guard [Nombre]
 ```
 :::tip Observación
-- Crea un archivo base para definir un guard.
+- Crea un archivo base para definir un Guard.
 :::
 
 - El Guard se vería así:
@@ -1059,29 +1059,29 @@ export class TasksGuard implements CanActivate {
 
 ```
 :::tip Observación
-- Un Guard debe implementar el método canActivate , que devuelve un valor booleano o una promesa/observable que resuelve a true o false. Si devuelve true, la solicitud puede continuar y llegar al controlador; si devuelve false, se bloquea el acceso al endpoint y se devuelve una respuesta 403.
-- El parámetro ExecutionContext contiene un objeto que tiene acceso a la solicitud y contexto de ejecución (en pocas palabras contiene información de la petición, que es mucha más completa que un middleware). Se puede usar para obtener detalles de la solicitud HTTP, los parámetros, la autenticación, etc. Básicamente encapsula toda la información de la solicitud y su contexto, permitiéndote acceder a datos específicos según el tipo de transporte que se esté utilizando (HTTP, WebSocket, gRPC, etc.). Esto te permite manejar y personalizar la lógica de autorización, interceptación y manejo de errores de manera efectiva en diversos entornos de aplicación.
+- Un Guard debe implementar el método `canActivate`, que devuelve un valor booleano o una promesa/observable que resuelve a `true` o `false`. Si devuelve `true`, la solicitud puede continuar y llegar al método del controlador. Si devuelve `false`, se bloquea el acceso al endpoint y se devuelve una respuesta `403`.
+- El parámetro `ExecutionContext` contiene información sobre la solicitud y el contexto de ejecución. Es más completo que la información que recibe un middleware y permite acceder a datos específicos de la solicitud, como los parámetros, la autenticación, el método del controlador, entre otros.
 - Algunos de sus métodos son:
-  - switchToHttp(): Esto transforma el contexto en un contexto HTTP, lo que te permite obtener la solicitud y respuesta HTTP
-  - getHandler(): Obtiene el manejador (handler) actual, es decir, el método del controlador que está siendo ejecutado. Esto es útil si quieres acceder a las anotaciones o metadatos del manejador, como los decoradores.
-  - getClass(): Devuelve la clase del controlador en la que se encuentra el manejador que está siendo ejecutado.
-  - getArgs(): Devuelve un arreglo con los argumentos que fueron pasados al manejador, dependiendo del tipo de contexto (HTTP, RPC, WebSocket, etc.).
-  - getType(): Devuelve el tipo de transporte (HTTP, WebSocket, etc.). Esto es útil si estás desarrollando una aplicación con múltiples tipos de transporte y necesitas actuar de manera diferente según el tipo de solicitud.
-- En este ejemplo, si la URL no tiene ninguna QUERY le bloqueamos el acceso.
+  - `switchToHttp()`: Permite acceder a la solicitud y respuesta HTTP.
+  - `getHandler()`: Obtiene el método del controlador que se ejecutará si el Guard permite continuar con la solicitud.
+  - `getClass()`: Obtiene la clase del controlador a la que pertenece el método que se ejecutará.
+  - `getArgs()`: Obtiene los argumentos que se pasarán al método del controlador.
+  - `getType()`: Obtiene el tipo de transporte utilizado, como `HTTP`, `WebSocket`, etc.
+- En este ejemplo, si la URL no tiene ninguna `query`, bloqueamos el acceso.
 :::
 
 
 :::tip Contexto de ejecución
-- El "contexto de ejecución" se refiere al entorno de ejecución donde se ejecuta una pieza de código.
-- En NestJS, cambiar de contexto te permite acceder a información específica de un tipo de solicitud o transporte (como HTTP, WebSocket, gRPC, etc.). Esto se logra mediante métodos proporcionados por el framework que facilitan la adaptación a diferentes contextos.
-- Por ejemplo, cuando trabajas con solicitudes HTTP, puedes usar métodos como switchToHttp() para acceder a los objetos request y response. Esto es útil cuando necesitas manejar solicitudes HTTP en tus interceptores, guards, o middlewares.
-- Cambiar de contexto en NestJS es una técnica que te permite acceder a la información de un tipo de solicitud o transporte (HTTP, WebSocket, gRPC, etc.). Utilizando métodos como switchToHttp(), switchToWs(), o switchToRpc(), puedes manejar diferentes tipos de solicitudes de manera flexible y estandarizada, lo que facilita la adaptación de tu código a distintos entornos y tipos de comunicación.
-- Cambiar de contexto en NestJS te proporciona un objeto que te permite acceder a la información específica del tipo de transporte o contexto en el que se está ejecutando el código. Este enfoque estandariza cómo se accede a la información relevante según el tipo de solicitud o transporte.
-- [Mas información.](https://docs.nestjs.com/fundamentals/execution-context#current-application-context)
+- El "contexto de ejecución" se refiere al entorno en el que se está ejecutando una pieza de código. Es decir, indica qué programa está ejecutando ese código.
+- En **NestJS**, `ExecutionContext` permite acceder a información específica del tipo de solicitud o transporte que se está utilizando, como `HTTP`, `WebSocket` o `gRPC`.
+- Podemos cambiar de contexto utilizando métodos como `switchToHttp()`, `switchToWs()` o `switchToRpc()`. Por ejemplo, `switchToHttp()` permite acceder a los objetos `request` y `response` de una solicitud HTTP.
+- Esto permite que los **Guards**, **Interceptors** y otros componentes puedan acceder a la información correspondiente al tipo de solicitud que están procesando.
+- [Más información.](https://docs.nestjs.com/fundamentals/execution-context#current-application-context)
+
 :::
 
 #### Implementar guards
-- Con el decorador @UseGuards implementamos los guard:
+- Con el decorador `@UseGuards()` implementamos los Guards:
 ```js
 import { Body, Controller, Delete, Get,  Post, Put, Query, UseGuards} from '@nestjs/common';
 import { createTaskDto } from './dto/create-task.dto';
@@ -1103,22 +1103,22 @@ export class TasksController {
 
 ```
 :::tip Observación
-- Como solo estamos decorando un método del controlador, solo se implementaría en ese endpoint específico.
-- El parámetro del decorador @UseGuards especifica los Guards a implementar. 
-- En este ejemplo estamos implementando el Guard que creamos en el endpoint get de tasks. Ahora cada vez que se haga una petición get a /tasks se ejecutara el guard después del middleware (si contiene alguno).
+- Como solo estamos decorando un método del controlador, el Guard se aplicará únicamente a ese endpoint específico.
+- El parámetro del decorador `@UseGuards()` especifica los Guards que se van a implementar.
+- En este ejemplo, estamos implementando el Guard que creamos en el endpoint `GET` de `tasks`. Ahora, cada vez que se haga una petición `GET` a `/tasks`, se ejecutará el Guard después del middleware (si contiene alguno).
 :::
 
 ## Middleware
-- Un middleware es una función que se ejecuta antes de que se ejecute el método de un controlador. 
+- Un middleware es una función que se ejecuta antes de que se ejecute el método de un controlador.
 - Las funciones middleware pueden realizar las siguientes tareas:
-  1.	Ejecutar cualquier código.
-  2.	Hacer cambios en los objetos de solicitud y respuesta.
-  3.	Finalizar el ciclo de solicitud-respuesta (devolver una respuesta).
-  4.	Llamar a la siguiente función middleware en la pila (o al método del controlador).
-- Si un middleware no finaliza el ciclo de solicitud-respuesta, necesita llamar a la función next(). Esto permite que el siguiente middleware en la pila sea ejecutado (o el método del controlador si no hay ningún middleware más). Si no se llama a next(), la solicitud se queda "colgada", es decir, no llega a su destino.
-- Nest usa el mismo concepto de middleware que Express, por lo que cualquier persona que conozca Express podrá usar middleware en Nest de manera similar.
-- Nest permite que los middleware utilicen inyección de dependencias, lo que significa que pueden acceder a servicios u otras clases del mismo módulo a través del constructor, similar a cómo se haría en controladores o servicios.
-- Puedes implementar middleware usando una clase (donde aplicas el decorador @Injectable() y la interfaz NestMiddleware para hacerla más robusta), o simplemente con una función, que es más directa y no tiene requisitos especiales.
+  1. Ejecutar cualquier código.
+  2. Hacer cambios en los objetos de solicitud y respuesta.
+  3. Dejar de procesar la solicitud (devolver una respuesta).
+  4. Llamar a la siguiente función middleware en la pila (o al método del controlador).
+- Si un middleware no devuelve una respuesta, debe llamar a la función `next()`. Esto permite que se ejecute el siguiente middleware en la pila (o el método del controlador si no hay ningún middleware más). Si no se llama a `next()`, la solicitud se queda "colgada", es decir, no llega a su destino.
+- **NestJS** utiliza el mismo concepto de middleware que **Express**, por lo que cualquier persona que conozca **Express** podrá utilizar middleware en **NestJS** de manera similar.
+- **NestJS** permite que los middleware utilicen inyección de dependencias, lo que significa que pueden acceder a métodos de otras clases si los especificamos en el constructor. Se aplica el concepto de inyección de dependencias que ya vimos.
+- Puedes implementar middleware utilizando una clase (aplicando el decorador `@Injectable()` y la interfaz `NestMiddleware`) o simplemente utilizando una función, que es más directa y no tiene requisitos especiales.
 
 #### Generar middleware
 - Ejecutamos el comando:
@@ -1143,13 +1143,12 @@ export class TasksMiddleware implements NestMiddleware {
 
 ```
 :::tip Observación
-- El método use() es la función que se ejecutara antes del método del controlador y contiene los tres parámetros de Express.js
-
+- El método `use()` es la función que se ejecutará antes del método del controlador y contiene los tres parámetros de **Express.js**.
 :::
 
 #### Implementar middleware
-- Los middlewares se implementan en el módulo que va a contener los controladores (Acordate que un middleware en NestJS es una función que se ejecuta antes de que una solicitud llegue al controlador).
-- Entonces en el módulo de task:
+- Los middlewares se implementan en el módulo que va a contener los controladores. Acordate de que un middleware en **NestJS** es una función que se ejecuta antes de que una solicitud llegue al controlador.
+- Entonces, en el módulo de `Tasks`:
 
 ```js
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -1169,16 +1168,21 @@ export class TasksModule implements NestModule {
 
 ```
 :::tip Observación
-- La clase que representa el módulo, debe implementar la interfaz NestModule. Esto es necesario cuando se quiere implementar el middleware dentro de un módulo. Esta interfaz obliga a la clase a tener el método configure, que es donde se define qué middleware se va a aplicar y a qué rutas.
-- El método configure es parte de la interfaz NestModule. Aquí es donde realmente configuras el middleware:
-  - consumer: MiddlewareConsumer: Este parámetro del método configure es una instancia de la clase MiddlewareConsumer, que te permite aplicar uno o varios middlewares a las rutas del módulo:
-  -	apply(): Método del MiddlewareConsumer que indica qué middleware se va a aplicar. En este caso, se está aplicando el middleware TasksMiddleware.
-  -	forRoutes(): Método que indica a qué rutas se va a aplicar el middleware. En este caso, se aplicará a todas las rutas 'tasks'.
-  - Apply() devuelve un objeto que permite seguir configurando cómo y dónde debe aplicarse el middleware mediante métodos encadenados como forRoutes(), exlude() , etc…
-
+- La clase que representa el módulo debe implementar la interfaz `NestModule`. Esto es necesario cuando se quiere implementar un middleware dentro de un módulo. Esta interfaz obliga a la clase a tener el método `configure`, que es donde se define qué middleware se va a aplicar y a qué rutas.
+- El método `configure` es parte de la interfaz `NestModule`. Aquí es donde configuramos el middleware:
+  - **`consumer: MiddlewareConsumer`**: Es un parámetro del método `configure` que permite aplicar uno o varios middlewares a las rutas del módulo.
+  - **`apply()`**: Es un método de `MiddlewareConsumer` que indica qué middleware se va a aplicar. En este caso, se está aplicando el middleware `TasksMiddleware`.
+  - **`forRoutes()`**: Es un método que indica a qué rutas se va a aplicar el middleware. En este caso, se aplicará a todas las rutas de `tasks`.
+  - `apply()` devuelve un objeto que permite seguir configurando cómo y dónde se debe aplicar el middleware mediante métodos encadenados como `forRoutes()`, `exclude()`, etc.
 :::
 
-- Cambiamos solo para la ruta GET:
+:::tip Métodos encadenados
+- Los métodos encadenados (o method chaining) permiten ejecutar varios métodos en una sola línea de código, llamando a un método inmediatamente después de otro.
+- Por lo tanto, un método encadenado es un método que devuelve una especie de objeto que permite seguir invocando otro método en la misma línea.
+:::
+
+
+- Cambiamos para que se aplique solamente a la ruta `GET`:
 
 ```js
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
@@ -1200,9 +1204,9 @@ export class TasksModule implements NestModule {
 
 ```
 :::tip Observación
-- Podemos especificar un objeto para indicar en qué tipo de petición de la ruta/endpoint (path) se va a implementar el middleware.
-- En este ejemplo solo se implementa en las peticiones GET de la ruta /tasks.
-- Podes especificar varios objetos para indicar los diferentes tipos de peticiones para un middleware y muchas otras cosas, te toca chequear la documentación.
+- Podemos especificar un objeto para indicar en qué tipo de petición de la ruta/endpoint (`path`) se va a implementar el middleware.
+- En este ejemplo, solo se implementa en las peticiones `GET` de la ruta `/tasks`.
+- El objeto puede tener muchas otras propiedades, así que tocará revisar la documentación.
 :::
 
 #### Ejemplo de un Middleware de autenticación
@@ -1225,27 +1229,27 @@ export class TasksMiddleware implements NestMiddleware {
 
 
 ## Interceptors
-- Un interceptor es una clase con el decorador @Inyectable que implementa la interfaz NestInterceptor.
-- Los interceptores en NestJS se inspiran en la técnica de Programación Orientada a Aspectos (AOP), que permite aplicar lógica adicional alrededor de la ejecución de métodos, sin modificar directamente el código del método en cuestión. Esto significa que los interceptores pueden influir en el comportamiento de los controladores y servicios de NestJS de diversas maneras, como ejecutar lógica antes y después de un método, transformar su resultado, o incluso anular la ejecución completa del método bajo condiciones específicas.
+- Un interceptor es una clase con el decorador `@Injectable()` que implementa la interfaz `NestInterceptor`.
+- Los interceptores permiten ejecutar lógica adicional antes o después de que se ejecute un método, sin modificar directamente el código de ese método.
 - Permiten:
-  1.	Vincular lógica antes y después de la ejecución de un método:
-  Los interceptores permiten ejecutar código tanto antes de que un controlador o método de servicio se ejecute como después de su finalización.
-  2.	Transformar el resultado devuelto por una función:
-  Después de que un método devuelva una respuesta, el interceptor puede modificar el resultado antes de enviarlo de vuelta al cliente.
-  3.	Transformar excepciones lanzadas por una función:
-  Si un método lanza una excepción, el interceptor puede capturarla y manejarla o transformarla en un mensaje diferente.
-  4.	Ampliar el comportamiento de una función básica:
-  El interceptor puede agregar lógica adicional que no está presente en el método original, ampliando su funcionalidad sin modificar el código del controlador o servicio.
-  5.	Anular una función dependiendo de condiciones específicas:
-  6. En ciertos casos, el interceptor puede decidir no ejecutar el método del controlador, por ejemplo, si la respuesta ya está en caché y no es necesario recalcularla.
+  1. **Ejecutar lógica antes y después de un método:**
+     Los interceptores pueden ejecutar código antes de que se ejecute un método y después de que termine su ejecución.
+  2. **Transformar el resultado de un método:**
+     Después de que un método devuelva una respuesta, el interceptor puede modificar el resultado antes de enviarlo al cliente.
+  3. **Transformar excepciones:**
+     Si un método lanza una excepción, el interceptor puede capturarla y transformarla en otra respuesta.
+  4. **Agregar lógica adicional:**
+     El interceptor puede agregar funcionalidades sin modificar el código del controlador o servicio.
+  5. **Evitar la ejecución de un método:**
+     En algunos casos, el interceptor puede evitar que se ejecute el método del controlador, por ejemplo, si la respuesta ya se encuentra en caché.
 
-#### Metodo intercept()
-- Cada interceptor implementa el método intercept(). Este método toma dos argumentos principales:
-  -	ExecutionContext:
-    - Este objeto proporciona detalles sobre el contexto en el que se está ejecutando el método, como el tipo de transporte (HTTP, WebSocket, etc.), los argumentos de la solicitud, o incluso los detalles de autenticación. Los interceptores pueden usar estos detalles para construir lógica más genérica que funcione en una amplia gama de controladores y métodos. [Este mismo objeto se utiliza en los guards](README.md#crear-un-guard).
-  - CallHandler:
-    - Este objeto proporciona el método handle(), que se usa para invocar el método del controlador de ruta. Si handle() no es llamado dentro de intercept(), el método del controlador no se ejecutará.
-    - Como handle() devuelve un Observable, podemos aplicar operadores de RxJS para manipular la respuesta antes de devolverla al cliente.
+#### Método `intercept()`
+- Cada interceptor implementa el método `intercept()`. Este método recibe dos parámetros principales:
+  - **`ExecutionContext`**:
+    - Contiene información sobre la solicitud y el método del controlador que se va a ejecutar, como el tipo de transporte (`HTTP`, `WebSocket`, etc.) y los argumentos de la solicitud. Es el mismo objeto que utilizan los Guards ([ver Crear un Guard](README.md#crear-un-guard)).
+  - **`CallHandler`**:
+    - Contiene el método `handle()`, que se utiliza para ejecutar el método del controlador. Si `handle()` no se llama dentro de `intercept()`, el método del controlador no se ejecutará.
+    - `handle()` devuelve un `Observable`, lo que permite utilizar operadores de **RxJS** para modificar la respuesta antes de devolverla al cliente.
 
 
 ####  Primer ejemplo
@@ -1270,29 +1274,29 @@ export class TasksInterceptor implements NestInterceptor {
 
 ```
 :::tip Observación
-- Lo podés generar con el comando “nest generate interceptor [nombre]”.
+- Lo podés generar con el comando `nest generate interceptor [nombre]`.
 :::
 
 :::tip Explicación del código
-- Todo Interceptor tiene el método `intercept` (te obliga la interfaz `NestInterceptor`), el cual tiene dos parámetros:
-  - `context: ExecutionContext`: Proporciona información sobre el contexto de la ejecución actual, como el tipo de transporte (HTTP, WebSocket, etc.) y los detalles de la solicitud.
-  - `next: CallHandler`: Proporciona el método `handle()` que se encarga de ejecutar el método que maneja la solicitud.
-- Flujo dentro del método `intercept`:
+- Todo Interceptor tiene el método `intercept()` (la interfaz `NestInterceptor` lo requiere), que recibe dos parámetros:
+  - `context: ExecutionContext`: Proporciona información sobre la solicitud y el contexto de ejecución.
+  - `next: CallHandler`: Proporciona el método `handle()`, que se encarga de ejecutar el método del controlador.
+- Flujo dentro del método `intercept()`:
   - `console.log('Before...')`:
-    - Esta línea imprime el mensaje `"Before..."` en la consola antes de que se ejecute el método del controlador. Esto sirve para registrar cuando el interceptor está siendo invocado antes de que el método del controlador sea llamado.
+    - Imprime el mensaje `"Before..."` en la consola antes de que se ejecute el método del controlador.
   - `const now = Date.now()`:
-    - Esta línea captura el momento actual en milisegundos para medir cuánto tarda en ejecutarse el método del controlador.
+    - Guarda el momento actual en milisegundos para poder calcular cuánto tarda en ejecutarse el método del controlador.
   - `return next.handle().pipe(...)`:
-    - El método `handle()` del `CallHandler` es invocado aquí. Este método ejecuta el controlador correspondiente (el método del controlador que maneja la solicitud entrante).
-    - `pipe()`: Es un método de los Observables de RxJS que permite manipular o reaccionar a la respuesta del método.
-  - `tap(() => console.log(After... ${Date.now() - now}ms))`:
-    - El operador `tap()` es usado para realizar una acción sin modificar el valor de la respuesta del controlador. Aquí, se usa para imprimir el tiempo transcurrido desde que se capturó `now` hasta que el controlador terminó de ejecutarse. Este cálculo se hace restando `Date.now()` (el tiempo actual después de la ejecución) del valor de `now` (el tiempo capturado antes de la ejecución).
-    
-- Así, el mensaje `"After... Xms"` se imprimirá, donde `X` es el tiempo que tardó en ejecutarse el método del controlador en milisegundos.
+    - `handle()` ejecuta el método del controlador.
+    - `pipe()` permite utilizar operadores de **RxJS** para trabajar con la respuesta.
+  - `tap(() => console.log("After... ${Date.now() - now}ms"))`:
+    - `tap()` permite ejecutar una acción sin modificar la respuesta.
+    - En este caso, muestra en la consola cuánto tiempo tardó en ejecutarse el método del controlador.
+- De esta forma, se mostrará el mensaje `"After... Xms"`, donde `X` representa el tiempo que tardó en ejecutarse el método del controlador en milisegundos.
 :::
 
 
-- Para implementar el interceptor, simplemente lo especificamos en el controlador (se implementa en todos los métodos) o método que lo va a usar mediante el decorador @UseInterceptors():
+- Para implementar un interceptor, simplemente lo especificamos en el controlador (se aplicará a todos sus métodos) o en el método que lo va a utilizar, mediante el decorador `@UseInterceptors()`:
 
 ```js
 import { Body, Controller, Delete, Get,  Post, Put, Query, UseInterceptors} from '@nestjs/common';
