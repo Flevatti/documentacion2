@@ -1062,7 +1062,7 @@ export class TasksGuard implements CanActivate {
 - Un Guard debe implementar el método `canActivate`, que devuelve un valor booleano o una promesa/observable que resuelve a `true` o `false`. Si devuelve `true`, la solicitud puede continuar y llegar al método del controlador. Si devuelve `false`, se bloquea el acceso al endpoint y se devuelve una respuesta `403`.
 - El parámetro `ExecutionContext` contiene información sobre la solicitud y el contexto de ejecución. Es más completo que la información que recibe un middleware y permite acceder a datos específicos de la solicitud, como los parámetros, la autenticación, el método del controlador, entre otros.
 - Algunos de sus métodos son:
-  - `switchToHttp()`: Permite acceder a la solicitud y respuesta HTTP.
+  - `switchToHttp()`: Indica que se trata de una solicitud HTTP. Al tratarse de una solicitud HTTP, podemos acceder al `request`, por ejemplo, mediante el método `getRequest()`.
   - `getHandler()`: Obtiene el método del controlador que se ejecutará si el Guard permite continuar con la solicitud.
   - `getClass()`: Obtiene la clase del controlador a la que pertenece el método que se ejecutará.
   - `getArgs()`: Obtiene los argumentos que se pasarán al método del controlador.
@@ -1073,11 +1073,10 @@ export class TasksGuard implements CanActivate {
 
 :::tip Contexto de ejecución
 - El "contexto de ejecución" se refiere al entorno en el que se está ejecutando una pieza de código. Es decir, indica qué programa está ejecutando ese código.
-- En **NestJS**, `ExecutionContext` permite acceder a información específica del tipo de solicitud o transporte que se está utilizando, como `HTTP`, `WebSocket` o `gRPC`.
-- Podemos cambiar de contexto utilizando métodos como `switchToHttp()`, `switchToWs()` o `switchToRpc()`. Por ejemplo, `switchToHttp()` permite acceder a los objetos `request` y `response` de una solicitud HTTP.
+- En **NestJS**, `ExecutionContext` permite acceder a información específica del tipo de solicitud o transporte que se está utilizando para trasladar los datos, como `HTTP`, `WebSocket` o `gRPC`.
+- Podemos cambiar de contexto utilizando métodos como `switchToHttp()`, `switchToWs()` o `switchToRpc()`. Con estos métodos le indicamos el tipo de solicitud (`HTTP`, `WebSocket`, `gRPC`, etc.) que se está haciendo para poder obtener información sobre esta. Por ejemplo, si utilizamos `switchToHttp()`, podemos obtener el `request` o el `response`.
 - Esto permite que los **Guards**, **Interceptors** y otros componentes puedan acceder a la información correspondiente al tipo de solicitud que están procesando.
 - [Más información.](https://docs.nestjs.com/fundamentals/execution-context#current-application-context)
-
 :::
 
 #### Implementar guards
@@ -1319,19 +1318,18 @@ export class TasksController {
    }
 ```
 :::tip Observación
-- El Interceptor que creamos antes se especifica en el decorador @UseInterceptors. Esto significa que cuando se ejecute el método del controlador, también se ejecutará el interceptor que creamos.
-- Puedes usar el decorador @UseInterceptors en dos lugares:
+- El Interceptor que creamos antes se especifica en el parámetro del decorador `@UseInterceptors` que decora un método. Esto significa que, cuando se ejecute el método del controlador, también se ejecutará el Interceptor que creamos.
+- Puedes usar el decorador `@UseInterceptors` en dos lugares:
   - En la clase del controlador:
-    - Si aplicas @UseInterceptors a la clase del controlador, el interceptor se aplicará a todos los métodos dentro de esa clase.
+    - Si se utiliza `@UseInterceptors` en la clase del controlador, el Interceptor se aplicará a todos los métodos dentro de esa clase.
   - En un método específico del controlador:
-    - Si aplicas @UseInterceptors a un método específico, el interceptor solo se aplicará a ese método en particular.
-- Así que, en resumen, @UseInterceptors se puede usar a nivel de clase para afectar todos los métodos del controlador o a nivel de método para afectar solo el método específico.
-
+    - Si se utiliza `@UseInterceptors` en un método específico, el Interceptor solo se aplicará a ese método.
+- En resumen, `@UseInterceptors` se puede usar a nivel de clase para afectar a todos los métodos del controlador o a nivel de método para afectar solo a un método específico.
 :::
 
 
 #### Interceptor global
-- La aplicación de Nest tiene el método useGlobalInterceptors() para poder especificar los interceptores que se van a implementar de manera global (en toda la aplicación).
+- La aplicación de **NestJS** tiene el método `useGlobalInterceptors(X)` para especificar los interceptores que se van a implementar de manera global (sería como decorar con `@UseInterceptors(X)` a todos los controladores de la aplicación).
 - Ejemplo:
 ```js
 import { TasksInterceptor } from './tasks/tasks.interceptor';
@@ -1345,8 +1343,9 @@ app.useGlobalInterceptors(new TasksInterceptor());
 
 ```
 :::tip Observación
-- Le pasamos una instancia de la clase que contiene el interceptor al método useGlobalInterceptors().
-- El interceptor que le indicamos al método se va a implementar en todos los controladores de la aplicación.
+- Le pasamos una instancia de la clase que contiene el Interceptor al método `useGlobalInterceptors()`.
+- El Interceptor que le indicamos al método se va a implementar en todos los controladores de la aplicación.
+- Sería como decorar con `@UseInterceptors(TasksInterceptor)` todos los controladores de la aplicación.
 :::
 
 #### Segundo ejemplo
@@ -1368,52 +1367,58 @@ export class TasksInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
 ```
 :::tip Explicación del código
-- `TasksInterceptor<T>`: Esta clase es un interceptor genérico en NestJS. `T` es un tipo genérico que define el tipo de datos que el interceptor manejará. Implementa la interfaz `NestInterceptor`. Al ser genérico, puede trabajar con cualquier tipo de dato.
+- `TasksInterceptor<T>`: `T` es un tipo genérico que representa el tipo de dato que devuelve el método del controlador. Al ser genérico, podemos utilizar este Interceptor con múltiples métodos sin necesidad de limitarnos a un tipo de dato específico.
 - `NestInterceptor<T, Response<T>>`:
-  - `T`: Es el tipo de dato que el interceptor recibirá como entrada, es decir, el resultado que devuelve el método del controlador. Por ejemplo, si el método del controlador devuelve un `string`, `T` sería `string`.
-  - `Response<T>`: Es el tipo de dato que el interceptor devolverá. Esto significa que el interceptor transformará el resultado en un objeto que tendrá la estructura definida por `Response`, donde `nuevaPropiedad` contendrá el dato original de tipo `T`.
+  - `T`: Es el tipo de dato que devuelve el método del controlador. Por ejemplo, si el método devuelve un `string`, `T` será `string`.
+  - `Response<T>`: Es el tipo de dato que devolverá el Interceptor. En este caso, será un objeto que tendrá una propiedad `nuevaPropiedad` que contendrá el dato original.
 - `next.handle().pipe(map(data => ({ nuevaPropiedad: data })))`:
-  - `next.handle()`: Devuelve un `Observable` que emite el resultado del método del controlador.
-  - `pipe(map(data => ({ nuevaPropiedad: data })))`: Usa el operador `map` de RxJS para transformar el resultado. En lugar de devolver el resultado original (`data`), envuelve el resultado en un objeto con una propiedad `nuevaPropiedad` cuyo valor es el resultado original.
+  - `next.handle()`: Ejecuta el método del controlador y devuelve la respuesta.
+  - `pipe(map(...))`: Utiliza el operador `map` de **RxJS** para modificar la respuesta.
+  - `map(data => ({ nuevaPropiedad: data }))`: Recibe la respuesta del método del controlador y la convierte en un objeto que tiene la propiedad `nuevaPropiedad`, cuyo valor será la respuesta original.
+- De esta forma, el Interceptor modifica la respuesta del método del controlador agregándole la propiedad `nuevaPropiedad`.
 :::
 
 
 - Entonces el endpoint donde implementamos el interceptor quedaría así:
 
 ```js
-   @Get('/')
-   getAllTasks(@Query(ValidatePipe) query: queryTaskDto){
-    console.log("age" , typeof query.age);
-    console.log("name" ,typeof query.name);
-       return `Es la tarea de ${query.name}, tiene ${query.age + 20} años  `
-   }
+@UseInterceptors(TasksInterceptor)
+@Get('/')
+getAllTasks(@Query(ValidatePipe) query: queryTaskDto) {
+    console.log("age", typeof query.age);
+    console.log("name", typeof query.name);
 
+    return `Es la tarea de ${query.name}, tiene ${query.age + 20} años`;
+}
 ```
 :::tip Observación
-- Valor de T en TasksInterceptor&lt;T>: T es el valor que devuelve el método del controlador:
-  - El método retorna un string, ya que la respuesta es una cadena que incluye el nombre y la edad.
-  - Así, cuando se usa el interceptor en este contexto, se puede deducir que T es string.
-- NestInterceptor&lt;T, Response&lt;T>>:
-  - T: es string (lo que devuelve el método del controlador).
-  - Response&lt;T>: se convierte en Response&lt;string>. 
-- Conclusión: Los tipos genéricos se deducen del tipo de datos que el método del controlador devuelve. En este caso, dado que el método devuelve un string, se infiere que el interceptor manejará cadenas y retornará un objeto que encapsula esa cadena en una propiedad nuevaPropiedad. Esto permite que el interceptor se ajuste a diferentes tipos de datos en otros métodos, haciéndolo más flexible y reusable.
-- [Mas información.](https://docs.nestjs.com/interceptors#interceptors)
+- Valor de `T` en `TasksInterceptor<T>`: `T` representa el tipo de dato que devuelve el método del controlador:
+  - El método retorna un `string`, ya que la respuesta es una cadena que incluye el nombre y la edad.
+  - Por lo tanto, en este caso, `T` es `string`.
+- `NestInterceptor<T, Response<T>>`:
+  - `T`: Es `string`, porque es el tipo de dato que devuelve el método del controlador.
+  - `Response<T>`: Se convierte en `Response<string>`.
+- Entonces, en este caso el Interceptor recibe el `string` que devuelve el método del controlador y lo convierte en un objeto que tiene una propiedad `nuevaPropiedad` con ese `string`.
+- Al utilizar un tipo genérico, el mismo Interceptor puede utilizarse con métodos que devuelvan diferentes tipos de datos.
+- [Más información.](https://docs.nestjs.com/interceptors#interceptors)
 :::
 
-## Base de datos prisma
-- [Documentación de prisma.](https://docs.nestjs.com/recipes/prisma)
-- Prisma es una herramienta que facilita la interacción con bases de datos en aplicaciones Node.js y TypeScript. En lugar de escribir consultas SQL a mano o utilizar otras herramientas que ayudan a construir consultas SQL (como knex.js) o usar otros ORM (como TypeORM y Sequelize), Prisma ofrece una manera de gestionar la base de datos de una forma más estructurada y segura.
-
+## Base de datos Prisma
+- [Documentación de Prisma.](https://docs.nestjs.com/recipes/prisma)
+- Prisma es una herramienta que facilita la interacción con bases de datos en aplicaciones Node.js y TypeScript. Permite gestionar la base de datos sin tener que escribir las consultas SQL directamente y facilita el trabajo con los datos.
+- Existen otras herramientas y ORM que cumplen funciones similares, como **Knex.js**, **TypeORM** y **Sequelize**.
 #### ¿Qué hace Prisma?
-- ORM (Object-Relational Mapping): Prisma actúa como un intermediario entre tu código y la base de datos. Te permite manipular base de datos usando objetos y clases, en lugar de tener que escribir SQL directamente.
-- Alternativa a SQL y otras herramientas: Prisma se puede considerar como una alternativa a escribir SQL directamente o a usar otros generadores de consultas SQL y ORM que ya existen. Es decir, en lugar de construir consultas SQL manualmente o usar otras bibliotecas que lo hacen, puedes usar Prisma para interactuar con tu base de datos de manera más conveniente.
-- Soporte para varias bases de datos: Prisma actualmente es compatible con varias bases de datos, incluyendo PostgreSQL, MySQL, SQL Server, SQLite, MongoDB y CockroachDB (aunque el soporte para CockroachDB está en una fase preliminar).
-- Integración con TypeScript: Aunque puedes usar Prisma con JavaScript puro, está diseñado para integrarse muy bien con TypeScript. Esto significa que Prisma ofrece un nivel alto de "seguridad de tipos", lo que ayuda a evitar errores de tipo y a proporcionar una mejor experiencia de desarrollo cuando se usa TypeScript. La seguridad de tipos es una característica importante en TypeScript que ayuda a garantizar que los tipos de datos se utilicen correctamente en el código.
-- Comparación con otros ORM: Prisma proporciona garantías de seguridad de tipos que superan a las que ofrecen otros ORM en el ecosistema de TypeScript. Esto significa que ofrece una mayor protección y confiabilidad en el uso de los tipos de datos en comparación con otras herramientas como TypeORM.
+- **ORM (Object-Relational Mapping):** Prisma actúa como un intermediario entre nuestro código y la base de datos. Permite interactuar con la base de datos utilizando código de JavaScript o TypeScript, sin tener que escribir las consultas SQL directamente.
+- **Alternativa a otras herramientas:** Existen otras herramientas que permiten interactuar con bases de datos, como **Knex.js**, **TypeORM** y **Sequelize**. Prisma es una alternativa a estas herramientas.
+- **Soporte para varias bases de datos:** Prisma es compatible con varias bases de datos, como **PostgreSQL**, **MySQL**, **SQL Server**, **SQLite**, **MongoDB** y **CockroachDB**.
+- **Integración con TypeScript:** Prisma se integra con **TypeScript** y proporciona información sobre los tipos de datos que estamos utilizando. Esto ayuda a detectar errores relacionados con los tipos mientras desarrollamos la aplicación.
 
 
 :::tip ORM
-- ORM es una técnica de programación que permite interactuar con una base de datos relacional utilizando objetos y clases en lugar de escribir consultas SQL directamente. Básicamente, el ORM actúa como un intermediario entre tu código y la base de datos, traduciendo las operaciones que realizan los objetos en operaciones de bases de datos.
+
+- ORM es una técnica de programación que permite interactuar con una base de datos relacional utilizando objetos y clases, en lugar de escribir consultas SQL directamente.
+- Básicamente, el ORM actúa como un intermediario entre nuestro código y la base de datos. Los métodos que proporciona el ORM se encargan de realizar las consultas a la base de datos y nosotros solo tenemos que invocarlos.
+
 :::
 
 #### Instalamos prisma
@@ -1421,14 +1426,14 @@ export class TasksInterceptor<T> implements NestInterceptor<T, Response<T>> {
 npm install prisma --save-dev
 ```
 
-:::tip Paquete prisma
-- Es el CLI de Prisma
+:::tip Paquete `prisma`
+- Es el **CLI de Prisma**.
 - Este paquete contiene herramientas para ejecutar comandos como:
-  -	prisma init: para inicializar un proyecto de Prisma.
-  -	prisma migrate: para crear y aplicar migraciones a la base de datos.
-  -	prisma generate: para generar el cliente Prisma basado en el esquema definido.
-- No es necesario que este paquete esté en producción, ya que solo se utiliza durante el desarrollo.
-- Se encarga de generar y ejecutar los scripts SQL que modifican la estructura de la base de datos. La CLI es la que realiza estos cambios directamente en la base de datos.
+  - `prisma init`: inicializa un proyecto de Prisma.
+  - `prisma migrate`: crea y aplica migraciones a la base de datos.
+  - `prisma generate`: genera el cliente de Prisma que utilizaremos en nuestro código para realizar operaciones en la base de datos. Es decir, genera el objeto que contiene los métodos que utilizaremos para interactuar con la base de datos.
+- No es necesario que este paquete esté en producción, ya que se utiliza durante el desarrollo.
+- La CLI se encarga de generar y ejecutar las consultas SQL necesarias para modificar la estructura de la base de datos. Es la CLI la que realiza estos cambios directamente en la base de datos.
 :::
 
 - Inicializamos prisma:
@@ -1438,9 +1443,8 @@ npx prisma init
 ```
 
 :::tip Observación
-- Crea una carpeta llamada prisma, este va a contener toda la configuración y tablas de la base de datos.
-- Crea un archivo .ENV con una variable para señalar la URL de conexión.
-
+- Crea una carpeta llamada `prisma`, que contiene toda la configuración y las tablas de la base de datos.
+- Crea un archivo `.env` con una variable que contiene la URL de conexión a la base de datos.
 
 :::
 
@@ -1452,9 +1456,9 @@ docker run -p5432:5432 -e POSTGRES_PASSWORD=123 -e POSTGRES_DB=demodb  -e POSTGR
 ```
 
 :::tip Observación
-- Iniciamos postgres con una BD que se llama demodb con el usuario:
-  - user: usuario
-  - password: 123
+- Iniciamos PostgreSQL con una base de datos llamada `demodb` con el usuario:
+  - **user:** `usuario`
+  - **password:** `123`
 :::
 
 
@@ -1463,10 +1467,8 @@ docker run -p5432:5432 -e POSTGRES_PASSWORD=123 -e POSTGRES_DB=demodb  -e POSTGR
 DATABASE_URL="postgresql://usuario:123@localhost:5432/demodb?schema=public"
 ```
 :::tip Observación
-- Modificamos la URL de conexión para que se pueda conectar a la Base de datos de docker (fíjate donde puse los datos).
-- En La mayoría de los ORM te conectas a una BD por una URL de conexión como la que contiene la variable de entorno DATABASE_URL, te invito a que investigues más sobre el tema!
-
-
+- Modificamos la URL de conexión para poder conectarnos a la base de datos de Docker (fíjate dónde puse los datos).
+- En la mayoría de los ORM, te conectas a una base de datos mediante una URL de conexión como la que contiene la variable de entorno `DATABASE_URL`. ¡Te invito a que investigues más sobre el tema!
 :::
 
 
@@ -1493,33 +1495,34 @@ model User {
 
 ```
 :::tip Observación
-- generator client: Especifica qué paquete o herramienta Prisma va a usar para generar el cliente. Por defecto, Prisma usa prisma-client-js, que es el que genera el cliente para JavaScript/TypeScript. Este cliente generado es una instancia que contiene métodos como create(), .findMany(), .update(), etc., para que puedas realizar operaciones en la base de datos desde tu código sin necesidad de escribir SQL. El cliente contiene los métodos para consultar, insertar, actualizar y eliminar datos. En resumen: Crea un “objeto” con múltiples métodos para manipular la BD que se especificó en este archivo.
-- datasource db: Aquí se especifica a que base de datos se conectara
-  -	provider: Especifica el tipo de base de datos que se está utilizando. En este caso, postgresql indica que se está usando una base de datos PostgreSQL.
-  -	url: Es la URL de conexión a la base de datos. env("DATABASE_URL") indica que Prisma debe obtener la URL de conexión desde una variable de entorno llamada DATABASE_URL. Esto es útil para mantener la configuración sensible fuera del código fuente.
-- Por ultimo cada “model” representa una tabla en la base de datos, en este caso definimos un modelo (model) llamado User con los siguientes campos:
-  -   `id String @id @default(cuid())`:
-      -	id: Es el nombre del campo
-      -	String: Es el tipo de dato del campo id, que es una cadena de texto.
-      -	@id: Indica que este campo es la clave primaria(primary key) de la tabla.
-      -	@default(cuid()): Establece un valor predeterminado para el campo id, que es generado automáticamente usando una función cuid() (Create Unique ID).
-  -  `email String @unique`:
-      -	email: Es el nombre del campo
-      -	@unique: Asegura que el valor del campo email sea único en la tabla, es decir, no puede haber dos usuarios con el mismo correo electrónico.
-  -  `name String?`:
-      -	name: Es el nombre del campo
-      -	String?: El signo de interrogación (?) indica que este campo es opcional, por lo que puede ser null.
-  -  `password String`:
-      -	password: Es el nombre del campo
-  -  `createdAt DateTime @default(now())`:
-      -	createdAt: Es el nombre del campo
-      -	DateTime: Es el tipo de dato del campo, que es una fecha y hora.
-      -	@default(now()): Establece que el valor predeterminado de este campo sea la fecha y hora actual en el momento de la creación del registro.
-  -  `updateAt DateTime @updatedAt`:
-      -	updateAt: Es el nombre del campo
-      -	DateTime: Es el tipo de dato del campo, que es una fecha y hora.
-      -	@updatedAt: Indica que este campo se actualizará automáticamente cada vez que el registro sea modificado.
-- Como te darás cuentas se usan decoradores para especificar validaciones, restricciones o funciones típicas de una BD.
+- **`generator client`**: Especifica qué herramienta va a utilizar Prisma para generar el cliente. Por defecto, Prisma utiliza `prisma-client-js`, que genera el cliente para JavaScript/TypeScript. Este cliente es un objeto que contiene métodos como `create()`, `findMany()`, `update()`, etc., que permiten consultar, insertar, actualizar y eliminar datos de la base de datos desde nuestro código sin necesidad de escribir SQL.
+- **`datasource db`**: Aquí se especifica a qué base de datos se conectará Prisma.
+  - **`provider`**: Especifica el tipo de base de datos que se está utilizando. En este caso, `postgresql` indica que se está utilizando una base de datos PostgreSQL.
+  - **`url`**: Es la URL de conexión a la base de datos. `env("DATABASE_URL")` indica que Prisma debe obtener la URL de conexión desde una variable de entorno llamada `DATABASE_URL`. Esto permite mantener la configuración de conexión fuera del código fuente.
+- Por último, cada **`model`** representa una tabla en la base de datos. En este caso, definimos un modelo llamado `User` con los siguientes campos:
+  - **`id String @id @default(cuid())`**:
+    - `id`: Es el nombre del campo.
+    - `String`: Es el tipo de dato del campo `id`, que es una cadena de texto.
+    - `@id`: Indica que este campo es la clave primaria (primary key) de la tabla.
+    - `@default(cuid())`: Establece un valor predeterminado para el campo `id`, generado automáticamente mediante `cuid()`.
+  - **`email String @unique`**:
+    - `email`: Es el nombre del campo.
+    - `@unique`: Asegura que el valor del campo `email` sea único en la tabla. Es decir, no puede haber dos usuarios con el mismo correo electrónico.
+  - **`name String?`**:
+    - `name`: Es el nombre del campo.
+    - `String?`: El signo de interrogación (`?`) indica que este campo es opcional, por lo que puede ser `null`.
+  - **`password String`**:
+    - `password`: Es el nombre del campo.
+    - `String`: Es el tipo de dato del campo `password`, que es una cadena de texto.
+  - **`createdAt DateTime @default(now())`**:
+    - `createdAt`: Es el nombre del campo.
+    - `DateTime`: Es el tipo de dato del campo, que representa una fecha y hora.
+    - `@default(now())`: Establece como valor predeterminado la fecha y hora actual en el momento de crear el registro.
+  - **`updateAt DateTime @updatedAt`**:
+    - `updateAt`: Es el nombre del campo.
+    - `DateTime`: Es el tipo de dato del campo, que representa una fecha y hora.
+    - `@updatedAt`: Indica que este campo se actualizará automáticamente cada vez que el registro sea modificado.
+- Como te darás cuenta, se utilizan **decoradores** (aunque Prisma los considera anotaciones) para especificar tipos de datos, restricciones o comportamientos de los campos de la base de datos.
 :::
 
 
@@ -1530,40 +1533,40 @@ model User {
 npx prisma migrate dev --name init
 ```
 :::tip Observación
-- migrate dev: Es un comando especifico de prima que se utiliza para:
-  -  Detectar cambios en el esquema de tu base de datos. Prisma compara el archivo schema.prisma (donde defines los modelos y relaciones de la base de datos) con la estructura actual de la base de datos.
-  -  Crear una nueva migración que refleja esos cambios.
-  -  Aplicar automáticamente esos cambios a la base de datos.
-- El --name permite asignar un nombre a la migración. En este caso, la migración se llama init (que suele usarse para indicar que es la primera migración, la inicialización de la base de datos).
-- Este nombre es importante porque ayuda a identificar de qué se trata cada migración. Si más adelante haces otro cambio en el esquema, podrías usar algo como --name add-users-table para que sea fácil reconocer qué hace esa migración en particular.
-- Cuando ejecutas el comando npx prisma migrate dev --name init, lo que sucede es lo siguiente:
-  1.	Prisma revisa el archivo schema.prisma para ver si hay cambios en los modelos de la base de datos.
-  2.	Genera un archivo de migración (en una carpeta como prisma/migrations) que contiene los comandos necesarios (en SQL) para aplicar esos cambios en la base de datos.
-  3.	Aplica esos cambios a la base de datos, asegurando que tu esquema esté actualizado.
-  4.	Guarda esa migración bajo el nombre init, para que puedas rastrear fácilmente qué cambios fueron hechos.
+- `migrate dev` es un comando específico de Prisma que se utiliza para:
+  - Detectar cambios en el archivo `schema.prisma`.
+  - Crear una nueva migración que refleja esos cambios.
+  - Aplicar automáticamente esos cambios a la base de datos.
+- El parámetro `--name` permite asignar un nombre a la migración. En este caso, la migración se llama `init`, que suele utilizarse para indicar que es la primera migración o la inicialización de la base de datos.
+- Este nombre es importante porque ayuda a identificar de qué se trata cada migración. Por ejemplo, si más adelante agregamos una tabla de usuarios, podemos utilizar `--name add-users-table` para identificar fácilmente qué cambios realiza esa migración.
+- Cuando ejecutamos `npx prisma migrate dev --name init`, sucede lo siguiente:
+  1. Prisma revisa el archivo `schema.prisma` para detectar cambios en los modelos de la base de datos.
+  2. Genera una migración dentro de una carpeta como `prisma/migrations`, que contiene las consultas SQL necesarias para aplicar esos cambios.
+  3. Aplica esos cambios a la base de datos.
+  4. Guarda la migración con el nombre `init`, para poder identificarla posteriormente.
 :::
 
 
 :::tip Migración
-- Las migraciones son como un historial de cambios. Cada vez que realizas un cambio en el diseño de la base de datos, creas una nueva "migración" que contiene las instrucciones necesarias para aplicar esos cambios. Esta migración se guarda como un archivo de texto que tiene el SQL o código específico para modificar la base de datos.
-- Prisma, como ORM, facilita este proceso al permitirte describir tu base de datos en un archivo de esquema (schema.prisma). Luego, Prisma genera automáticamente las migraciones necesarias al comparar tu esquema con el estado actual de la base de datos. Así, no necesitas escribir manualmente el SQL, solo describes los cambios en el esquema, y Prisma se encarga del resto.
-
+- Las migraciones son como un historial de cambios. Cada vez que modificas el diseño de la base de datos, creas una nueva "migración" que contiene las instrucciones necesarias para aplicar esas modificaciones. Esta migración se guarda como un archivo de texto que contiene las consultas SQL necesarias para modificar la base de datos.
+- Prisma, como ORM, facilita este proceso al permitirte definir la "estructura" de la base de datos en un archivo de esquema (`schema.prisma`). Luego, Prisma genera automáticamente las migraciones necesarias al comparar el esquema con el estado actual de la base de datos. Así, no necesitas escribir manualmente las consultas SQL: solo defines la estructura en el esquema y Prisma se encarga del resto.
 :::
 
-#### Servicio para conectarte a la Base de datos
-- Instalamos el paquete para el cliente:
+#### Cliente de Prisma
+- Instalamos el paquete que se utiliza para crear el cliente de Prisma:
 ```powershell
 npm install @prisma/client
 ```
 :::tip Observación
-- Este paquete contiene las clases y métodos que permiten hacer consultas a la base de datos con Prisma, como prisma.user.findMany() o prisma.post.create().
-- Este paquete sí es necesario en producción, ya que es el que permite la conexión y consulta a la base de datos.
-- Es el paquete que prisma utilizara para crear una clase (se llama cliente) que permita manipular la base de datos que especificamos en el esquema.
-- Durante la instalación de @prisma/client, se invoca automáticamente el comando prisma generate para crear el cliente basado en los modelos definidos en el archivo schema.prisma.
-- Después de esa instalación inicial, cada vez que hagas un cambio en tus modelos (por ejemplo, agregues una nueva tabla o modifiques una existente), deberás ejecutar prisma generate para que Prisma actualice el cliente con los cambios reflejados en tu esquema. Esto asegura que el cliente generado siempre esté alineado con la estructura actual de tu base de datos.
+- El comando `prisma generate` utiliza un paquete para crear el cliente de Prisma. En nuestro caso, como utilizamos JavaScript/TypeScript, se utiliza el paquete `@prisma/client`.
+- Este paquete contiene las clases y métodos que permiten realizar consultas a la base de datos con Prisma, como `prisma.user.findMany()` o `prisma.post.create()`.
+- Es necesario en producción, ya que permite conectarnos y realizar consultas a la base de datos.
+- Prisma utiliza este paquete para generar el cliente, que es una clase que permite manipular la base de datos que especificamos en el esquema.
+- Durante la instalación de `@prisma/client`, se ejecuta automáticamente el comando `prisma generate` para crear el cliente basado en los modelos definidos en el archivo `schema.prisma`.
+- Después de la instalación inicial, cada vez que hagamos un cambio en nuestros modelos (por ejemplo, agregar una nueva tabla o modificar una existente), debemos ejecutar `prisma generate` para actualizar el cliente con los cambios realizados en el esquema.
 :::
 
-- En la carpeta src creamos el archivo prisma.service.ts que será un servicio que interactúe con la BD
+- En la carpeta `src` creamos el archivo `prisma.service.ts`, que será un servicio que interactuará con la base de datos.
 
 ```js
 import { Injectable, OnModuleInit } from '@nestjs/common';
@@ -1577,9 +1580,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
 ```
 :::tip Observación
-- Hereda la clase PrismaClient. 
-- La clase PrismaClient es la que Prisma genera y contiene todos los métodos para interactuar con tu base de datos (como .findMany(), .create(), .update(), etc.).
-- La Clase PrismaClient es el “cliente” que genera Prisma.
+- Hereda de la clase `PrismaClient`.
+- La clase `PrismaClient` es el "cliente" que genera Prisma y contiene los métodos para interactuar con la base de datos, como `.findMany()`, `.create()`, `.update()`, etc.
+- `async onModuleInit()`: Se ejecuta cuando el servicio se inicializa y utiliza `this.$connect()` para establecer la conexión con la base de datos. Para utilizar este método, se debe implementar la interfaz `OnModuleInit` (lo veremos más adelante en **Lifecycle Events**).
+- `await this.$connect()`: Espera a que se establezca la conexión con la base de datos antes de continuar.
 :::
 
 - En algún controlador lo podemos usar, en nuestro caso será uno de User, para esto en su servicio:
@@ -1617,25 +1621,25 @@ export class UserService {
 
 ```
 :::tip Observación
-- Cada propiedad del servicio es un modelo ósea una tabla de la BD que se definió en el archivo schema.prisma.
-- Por ejemplo, si tenés un modelo User en tu esquema, el cliente Prisma tendrá una propiedad user que representa esa tabla.
-- Cada propiedad del cliente (user, post, etc.) tiene métodos para manipular la tabla que representa su modelo. Estos métodos incluyen operaciones básicas de CRUD (crear, leer, actualizar y eliminar).
+- Cada propiedad del cliente es un modelo, es decir, una tabla de la base de datos que se definió en el archivo `schema.prisma`.
+- Por ejemplo, si tenemos un modelo `User` en nuestro esquema, el cliente de Prisma tendrá una propiedad `user` que representa esa tabla.
+- Cada propiedad del cliente (`user`, `post`, etc.) representa un modelo y contiene métodos para manipular esa tabla, como crear, consultar, actualizar y eliminar registros.
 - Por ejemplo:
-  - `findMany()` : Regresa todas las filas del modelo
-  - `create({data: X})` : Crea una fila usando los valores de la propiedad data. X debe ser un objeto donde cada propiedad es una columna de la fila.
-- [Para más información consulte en la documentación.](https://www.prisma.io/docs/orm/prisma-client/queries/crud)
+  - `findMany()`: Devuelve todas las filas del modelo.
+  - `create({ data: X })`: Crea una fila utilizando los valores de la propiedad `data`. `X` debe ser un objeto donde cada propiedad representa una columna de la fila.
+- [Para más información, consulte la documentación.](https://www.prisma.io/docs/orm/prisma-client/queries/crud)
 :::
 
 
-#### A probar el código!
-- A estas alturas ya deberías tener el conocimiento suficiente para hacer los cambios correspondientes para probar este código.
-- Si vas a implementar ValidationPipe(), deberías añadir decoradores en el DTO para especificar el tipo de dato (como @IsString()) de cada campo. De lo contrario, no serán reconocidos como campos y serán eliminados con whitelist: true.
+#### ¡A probar el código!
+- A estas alturas, ya deberías tener el conocimiento suficiente para realizar los cambios correspondientes y probar este código.
+- Si vas a implementar `ValidationPipe()`, deberías añadir decoradores en el DTO para especificar el tipo de dato de cada campo, como `@IsString()`. De lo contrario, no serán reconocidos como campos y serán eliminados al utilizar `whitelist: true`.
 
 
 
 ## Swagger
-- [Nest nos ofrece la opcion de poder usar swagger.](https://docs.nestjs.com/openapi/introduction)
-- [¿Qué es swagger?](https://flevatti.github.io/documentacion/docs/C--/API#swagger)
+- [NestJS nos ofrece la opción de utilizar Swagger.](https://docs.nestjs.com/openapi/introduction)
+- [¿Qué es Swagger?](https://flevatti.github.io/guide-software-development/docs/CSharp/API#swagger)
 
 #### Lo instalamos en el proyecto
 - Ejecutamos el comando:
@@ -1669,45 +1673,44 @@ bootstrap();
 ```
 :::tip Observación
 - `const config = new DocumentBuilder()`:
-  -	¿Qué hace?: Crea una instancia de DocumentBuilder, que es una clase proporcionada por NestJS para construir una configuración personalizada para Swagger.
-  -	Objetivo: Inicializar el objeto config para configurar el título, descripción, versión y otros detalles del documento Swagger.
-- `.setTitle('Cats example')` :
-  -	¿Qué hace?: Configura el título de la documentación de la API que se mostrará en Swagger.
-  -	Objetivo: Define que el título de la documentación será "Cats example".
+  - Crea una instancia de `DocumentBuilder`, que es una clase proporcionada por NestJS para configurar Swagger.
+- `.setTitle('Cats example')`:
+  - Define el título de la documentación.
 - `.setDescription('The cats API description')`:
-  -	¿Qué hace?: Configura una descripción para la API.
-  -	Objetivo: Describe que esta API es sobre "The cats API description".
+  - Define una descripción de la API.
 - `.setVersion('1.0')`:
-  -	¿Qué hace?: Especifica la versión de la API.
-  -	Objetivo: Define que la versión de la API es "1.0".
+  - Define la versión de la API.
 - `.addTag('cats')`:
-  -	¿Qué hace?: Añade una etiqueta (tag) llamada "cats", que sirve para organizar o categorizar los endpoints relacionados con gatos. Es importante aclarar que solo crea la etiqueta, no asigna automáticamente todos los endpoint a esta.
-  -	Objetivo: Etiquetar los endpoints de la API relacionados con "cats" para que se puedan agrupar en la documentación.
-- `.build();`:
-  -	¿Qué hace?: Finaliza la configuración del objeto config y lo devuelve completamente construido.
-  -	Objetivo: Completar la creación del documento de configuración para Swagger.
-- `const document = SwaggerModule.createDocument(app, config);`:
-  -	¿Qué hace?: Crea el documento Swagger a partir de la configuración config y la instancia de la aplicación app.
-  -	Objetivo: Genera la documentación que describe todos los endpoints y modelos de la API, usando la configuración previamente establecida.
-- `SwaggerModule.setup('api', app, document);`:
-  -	¿Qué hace?: Publica la documentación de la aplicación. El primer parámetro 'api' es el path (ruta) donde estará disponible la documentación interactiva (en este caso, /api), app es la aplicación NestJS y document es el documento generado por createDocument().
-  -	Objetivo: Publicar la documentación generada en la ruta /api, permitiendo a los usuarios ver la documentación y probar los endpoints de la API directamente desde el navegador.
+  - Crea una etiqueta (`tag`) llamada `cats`, que sirve para organizar los endpoints relacionados con gatos.
+  - Es importante aclarar que solo crea la etiqueta; no asigna automáticamente los endpoints a ella.
+- `.build()`:
+  - Finaliza la configuración y devuelve el objeto `config` que utilizaremos para generar la documentación.
+- `const document = SwaggerModule.createDocument(app, config)`:
+  - Genera la documentación teniendo en cuenta la `app` pasada y la configuración `config`.
+  - `app` es la aplicación, o sea, se va a crear una documentación de la aplicación que le pasemos.
+  - `config` es la configuración que va a utilizar Swagger para crear la documentación.
+  - El resultado se guarda en `document`, que representa la documentación generada por Swagger.
+- `SwaggerModule.setup('api', app, document)`: 
+  - Publica la documentación para que el usuario la pueda ver.
+  - El primer parámetro, `'api'`, indica la ruta donde estará disponible la documentación, en este caso `/api`.
+  - `app` es la aplicación de **NestJS** que estamos documentando y `document` es la documentación que generamos anteriormente.
+  - Desde esta ruta podemos ver la documentación y probar los endpoints de la API directamente desde el navegador.
+  - Se pasa `app` porque **Swagger** necesita conocer la aplicación de **NestJS** para generar las funciones necesarias que permiten utilizar la API desde el navegador.
 :::
 
 #### Decoradores
-- Mediante decoradores podemos asignarle una etiqueta a un endpoint.
+- Mediante decoradores podemos asignar un **tag** a un endpoint.
 
-:::tip etiqueta (tag)
-- Una tag en Swagger es como una carpeta (representada como una lista desplegable) que agrupa endpoints. 
+:::tip Etiqueta (tag)
+- Un **tag** en Swagger es como una carpeta (representada como una lista desplegable) que agrupa endpoints.
 - Sirve para organizar y clasificar los endpoints.
 - Supongamos que tienes una API que gestiona usuarios y productos. Puedes usar dos tags:
-  -	Tag "users": Agrupa todos los endpoints relacionados con usuarios, como GET /users para obtener usuarios.
-  -	Tag "products": Agrupa todos los endpoints relacionados con productos, como GET /products para obtener productos.
-
+  - **Tag `users`**: Agrupa todos los endpoints relacionados con usuarios, como `GET /users` para obtener usuarios.
+  - **Tag `products`**: Agrupa todos los endpoints relacionados con productos, como `GET /products` para obtener productos.
 :::
 
-- Con el decorador @Apitags le asignamos una etiqueta a un endpoint.
-- Podes asignarle una etiqueta a solo algunos endpoint, decorando solo el método:
+- Con el decorador `@ApiTags()` asignamos un **tag** a un controlador.
+- Podemos asignar un **tag** solo a algunos endpoints, decorando únicamente el método:
 
 ```js
 import { ApiTags } from '@nestjs/swagger';
@@ -1730,7 +1733,7 @@ export class UserController {
   }
 
 ```
-- También podes asignarle una etiqueta a todos los endpoint de un controlador decorando la clase:
+- También podés asignarle una etiqueta a todos los endpoints de un controlador decorando la clase:
 ```js
 import { ApiTags } from '@nestjs/swagger';
 
@@ -1750,7 +1753,7 @@ export class TasksController {
 
 ```
 
-- Con el decorador @ApiOperation podemos describir un endpoint, para esto le pasamos un objeto con la propiedad summary, su valor es la descripción:
+- Con el decorador `@ApiOperation()` podemos agregar una descripción a un endpoint. Para esto, le pasamos un objeto con la propiedad `summary`, cuyo valor será la descripción:
 
 ```js
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -1775,9 +1778,10 @@ export class UserController {
 
 
 ```
-- Con el decorador @Apiresponse podemos documentar el código de respuestas de un endpoint, cada objeto que le proporciones es una “posible respuesta” y contiene estas propiedades:
-  - status: Código de respuesta, puede ser 200, 400, etc..
-  - description: La descripción, acá indicamos que sucede cuando como respuesta nos devuelve el status que especificamos.
+- Con el decorador `@ApiResponse()` podemos documentar los códigos de respuesta posibles de un endpoint. Cada objeto que le proporcionamos representa una **posible respuesta** y contiene estas propiedades:
+  - **`status`**: Indica el código de respuesta, por ejemplo `200`, `400`, etc.
+  - **`description`**: Es la descripción de lo que sucede cuando el endpoint devuelve el código de respuesta especificado.
+
 - Ejemplo:
 ```js
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -1805,56 +1809,59 @@ export class UserController {
 
 ```
 :::tip
-- Esto solo son algunos de los decoradores, pero hay muchos más… ¡Te invito a investigar!
+- Estos solo son algunos de los decoradores, pero hay muchos más… ¡Te invito a investigar!
 :::
 
 ## Comandos
 
 #### Generate
-- Con el siguiente comando generas un elemento de Nest:
+- Con el siguiente comando podemos generar un elemento de **NestJS**:
 ```powershell
 Nest generate [TipoDeArchivo] [Nombre] [Opciones]
 ```
 
 :::tip Observación
-- Podes remplazar “generate” por “g” (es la abreviación de generate).
-- Tipo de Archivo puede ser controller, service , etc . También puedes utilizar abreviaciones como co para controller y s para service. 
-- Si el [nombre] es igual al que tiene el módulo, se añade en la misma carpeta y se hacen las configuraciones correspondientes para que permanezca en este.
-- Si el [Nombre] que proporcionas coincide con el nombre del módulo, el archivo se creará en la carpeta del módulo. No obstante, si usas una sintaxis como: nombreModulo/otraUbicacion/otraUbicacion/nombreArchivo, estás especificando la ruta exacta donde se guardará el archivo dentro del módulo. Las carpetas indicadas en otraUbicacion se crearán automáticamente si no existen, y al final se especifica el nombre del archivo. 
-- Por ejemplo, en el siguiente comando, se crearía una carpeta pipes adentro de la carpeta task (representa el módulo) y en esta se crearía el pipe llamado validate:  nest g pipe task/pipes/validate.
-- Cada elemento viene con su archivo de testing (spect.ts).
+- Podés reemplazar `generate` por `g` (es la abreviación de `generate`).
+- **Tipo de archivo** puede ser `controller`, `service`, etc. También podés utilizar abreviaciones como `co` para `controller` y `s` para `service`.
+- Si el **nombre** es igual al que tiene el módulo, el archivo se añade en la misma carpeta y se realizan las configuraciones correspondientes para que permanezca en este.
+- Si el **nombre** que proporcionás coincide con el nombre del módulo, el archivo se creará en la carpeta del módulo. No obstante, si usás una sintaxis como `nombreModulo/otraUbicacion/otraUbicacion/nombreArchivo`, estás especificando la ruta donde se guardará el archivo dentro del módulo. Las carpetas indicadas en `otraUbicacion` se crearán automáticamente si no existen, y al final se especifica el nombre del archivo.
+- Por ejemplo, en el siguiente comando se crearía una carpeta `pipes` dentro de la carpeta `task` (que representa el módulo) y en esta se crearía el Pipe llamado `validate`:
+  `nest g pipe task/pipes/validate`.
+- Cada elemento viene con su archivo de testing (`.spec.ts`).
 - Algunas de las opciones son:
-  - --no-spect : Sirve para no crear el archivo de testing.
+  - `--no-spec`: Sirve para no crear el archivo de testing.
 :::
 
 #### Generate resource
-- Como te habrás dado cuenta, cada módulo contiene servicios, controladores, dto , etc..
-- Existe una manera en Nest para crear todos los archivos necesarios para un módulo con un solo comando generate:
+- Como te habrás dado cuenta, cada módulo contiene servicios, controladores, DTO, etc.
+- En **NestJS** existe una forma de crear todos los archivos necesarios para un módulo utilizando un solo comando `generate`:
 ```powershell
 nest g resource [nombre]
 ```
 :::tip Observación
 - Una vez ejecutado el comando, te van a preguntar:
-  - Para qué tipo de aplicación es: REST API, GraphQL , Microservice , etc..
-  - Te preguntaría si deseas generar un CRUD básico.
-- Una vez completada las dos preguntas te generara el módulo, el controlador, los servicios, dto , entities para el nombre que especificaste. A su vez lo añadirá al modulo principal para que lo puedas probar al iniciar la aplicación.
+  - Para qué tipo de aplicación es: REST API, GraphQL, Microservice, etc.
+  - Si deseás generar un CRUD básico.
+- Una vez completadas las dos preguntas, se generará el módulo, el controlador, el servicio, los DTO y las entidades para el nombre que especificaste. A su vez, se añadirá al módulo principal para que lo puedas probar al iniciar la aplicación.
 :::
 
-## Cors
-- CORS (Cross-Origin Resource Sharing) es un mecanismo de seguridad que permite a las aplicaciones web hacer solicitudes HTTP a recursos que están alojados en un dominio diferente al del de la aplicación. En otras palabras, si tu aplicación se ejecuta en "dominio-a.com" y necesitas acceder a una API en "dominio-b.com", CORS permite que se realicen esas solicitudes de manera controlada y segura. Sin este mecanismo, los navegadores modernos bloquearían las solicitudes entre diferentes dominios debido a restricciones de seguridad, lo que se conoce como política de mismo origen (Same-Origin Policy).   
-- El funcionamiento básico de CORS implica que el navegador envía una solicitud especial llamada "preflight request" (solicitud de preevaluación) antes de enviar la solicitud principal. En esta preevaluación, el navegador pregunta al servidor si permite solicitudes desde el dominio de la aplicación que está haciendo la petición. Si el servidor lo autoriza, incluye ciertos encabezados en su respuesta, indicando qué métodos HTTP y qué orígenes están permitidos. De esta forma, se establece un control sobre qué dominios pueden interactuar con los recursos del servidor, reduciendo el riesgo de ataques como el Cross-Site Scripting (XSS).
-- Para habilitar las cors , editamos main.ts:
+
+## CORS
+- CORS (Cross-Origin Resource Sharing) es un mecanismo de seguridad que permite a las aplicaciones web realizar solicitudes HTTP a servidores que están alojados en un dominio diferente al de la aplicación. En otras palabras, si tu aplicación se ejecuta en `dominio-a.com` y necesita acceder a una API en `dominio-b.com`, CORS permite realizar esas solicitudes.
+- Sin este mecanismo, los navegadores modernos bloquearían las solicitudes entre diferentes dominios debido a restricciones de seguridad, lo que se conoce como política de mismo origen (Same-Origin Policy).
+- El funcionamiento básico de CORS implica que, en determinadas solicitudes, el navegador envía una solicitud especial llamada **preflight request** (solicitud de preevaluación) antes de enviar la solicitud principal. En esta preevaluación, el navegador pregunta al servidor si permite la solicitud desde el origen de la aplicación que está haciendo la petición. Si el servidor lo autoriza, incluye ciertos encabezados en su respuesta, indicando qué métodos HTTP y qué orígenes están permitidos.
+- Para habilitar CORS, editamos `main.ts`:
 ```js
 app.enableCors();
   await app.listen(3000);
 
 ```
 :::tip Observación
-- La aplicación tiene el método enableCors() que habilita los cors.
-- La configuración por defecto admite peticiones de todos los dominios.
+- La aplicación tiene el método `enableCors()`, que habilita CORS.
+- La configuración por defecto permite peticiones desde todos los dominios.
 :::
 
-- El método enableCors() puede recibir como parámetro un objeto de configuración opcional:
+- El método `enableCors()` puede recibir como parámetro un objeto de configuración opcional:
 ```js
 app.enableCors({
   origin: 'https://www.google.com/', // Solo permite solicitudes desde este dominio
@@ -1863,7 +1870,7 @@ app.enableCors({
 });
 
 ```
-- También puedes pasarle un callback para generar la configuración de forma asíncrona según la solicitud:
+- También podés pasarle un callback para generar la configuración de forma asíncrona según la solicitud:
 ```js
 app.enableCors((req, callback) => {
   const corsOptions = { origin: false }; // Configuración por defecto
@@ -1876,66 +1883,63 @@ app.enableCors((req, callback) => {
 
 ```
 :::tip Observación
-- Tenemos acceso a la solicitud y el callback en el primer parámetro devolvemos un error y en el segundo el objeto de configuración que se usara para la cors de esa solicitud.
-
+- Tenemos acceso a la solicitud mediante el primer parámetro del callback.
+- El callback recibe dos parámetros: en el primero podemos devolver un error y en el segundo, el objeto de configuración que se utilizará en esa solicitud.
 :::
 
-- Tambien puedes habilitar las cors con el segundo parámetro del método create() que crea la aplicación:
+- También podés habilitar las CORS con el segundo parámetro del método `create()`, que es el que crea la aplicación:
 ```js
  const app = await NestFactory.create(AppModule , {cors : true});
 ```
 :::tip Observación
-- El segundo parámetro del método create() es un objeto de configuraciones y una de esas son las cors.
-- La propiedad cors puede recibir true que es lo mismo que ejecutar el método “app.enableCors()”, también puede recibir un objeto de configuración o un callback como los ejemplos anteriores.
-
+- El segundo parámetro del método `create()` es un objeto de configuración y una de sus propiedades es `cors`.
+- La propiedad `cors` puede recibir `true`, que es equivalente a ejecutar el método `app.enableCors()`. También puede recibir un objeto de configuración o un callback, como en los ejemplos anteriores.
 :::
 
 
 ## Lifecycle Events
-- Un ciclo de vida en desarrollo de software describe las etapas por las que pasa un componente o aplicación desde su creación hasta su destrucción. Esto incluye la inicialización, la ejecución, el manejo de eventos y finalmente la destrucción del objeto o componente.
-- NestJS, al ser un framework modular basado en Node.js, aplica el concepto de ciclo de vida a varios niveles, especialmente en el manejo de servicios, controladores y módulos.
+- Un ciclo de vida en desarrollo de software describe las etapas por las que pasa un componente o una aplicación desde su creación hasta su destrucción. Esto incluye la inicialización, la ejecución y, finalmente, la destrucción del objeto o componente.
+- En **NestJS**, cada servicio, controlador o módulo tiene su propio ciclo de vida independiente.
 
 #### 1- Módulos
--	En NestJS, los módulos organizan el código. Cada módulo tiene su propio ciclo de vida.
--	Cuando una aplicación NestJS arranca, el módulo raíz (AppModule) es el primero en ser cargado. Luego, los submódulos son instanciados y configurados en función de sus dependencias.
+- En **NestJS**, los módulos organizan el código. Cada módulo tiene su propio ciclo de vida.
+- Cuando una aplicación de **NestJS** se ejecuta, el módulo raíz (`AppModule`) es el primero en ser cargado. Luego, los submódulos son cargados y configurados según sus dependencias.
 
 
 #### 2- Inyección de dependencias
-- NestJS sigue un patrón de inyección de dependencias para administrar servicios. Cuando un servicio es requerido, se instancia automáticamente si no existe ya una instancia.
+- **NestJS** utiliza la inyección de dependencias para administrar los servicios. Cuando se necesita un servicio, se crea automáticamente la instancia de dicho servicio si todavía no existe.
 - Un servicio en NestJS tiene dos posibles ciclos de vida
 
 ##### 1- Servicio Singleton (Instancia única)
--	Por defecto, todos los servicios en NestJS son singleton. Esto significa que solo se crea una instancia del servicio durante toda la vida de la aplicación.
--	Una vez creado, esta instancia es compartida entre todos los componentes que lo necesiten (controladores, otros servicios, etc.).
--	Ejemplo: Si un servicio se utiliza en varios controladores, no se crea una nueva instancia del servicio para cada controlador, sino que todos comparten la misma instancia.
+- Por defecto, todos los servicios en **NestJS** son singleton. Esto significa que solo se crea una instancia del servicio durante toda la vida de la aplicación.
+- Una vez creada, esta instancia es compartida entre todos los componentes que la necesiten (controladores, otros servicios, etc.).
+- Ejemplo: Si un servicio se utiliza en varios controladores, no se crea una nueva instancia del servicio para cada controlador, sino que todos comparten la misma instancia.
 - Este enfoque tiene varias ventajas:
-  -	Eficiencia: Al compartir una sola instancia, no es necesario crear nuevos objetos cada vez que se necesita el servicio.
-  -	Estado compartido: Si el servicio mantiene algún estado (como un caché en memoria o alguna variable), ese estado será el mismo para todos los que utilicen ese servicio.
+  - **Eficiencia:** Al compartir una sola instancia, no es necesario crear nuevos objetos cada vez que se necesita el servicio.
+  - **Estado compartido:** Todos los componentes que utilicen el servicio comparten la misma información que este tenga almacenada.
 ##### 2- Servicio Transitorio (Vida corta)
--	Si un servicio necesita ser transitorio (es decir, crear una nueva instancia cada vez que se necesita), puedes configurar el ciclo de vida para que sea así.
--	Esto significa que cada vez que un componente (como un controlador) necesite el servicio, NestJS creará una nueva instancia. Una vez que el trabajo con esa instancia termine, será destruida.
+- Si un servicio necesita ser transitorio (es decir, crear una nueva instancia cada vez que se necesita), podemos configurar su ciclo de vida para que sea así.
+- Esto significa que cada vez que un componente, como un controlador, necesite el servicio, **NestJS** creará una nueva instancia. Una vez que termine de utilizarse, esa instancia será destruida.
 
 #### 3- Controladores
-- Los controladores manejan las solicitudes HTTP y responden con datos
-- El ciclo de vida de un controlador está estrechamente relacionado con las solicitudes que recibe. A continuación, te lo explico paso a paso.
+- Los controladores reciben las solicitudes HTTP y devuelven una respuesta para cada solicitud.
+- El ciclo de vida de un controlador está relacionado con las solicitudes que recibe. A continuación, te lo explico paso a paso.
 
 ##### Creación del controlador
-- Por defecto, los controladores en NestJS se comportan como singleton, lo que significa que, al igual que los servicios, se crea una sola instancia del controlador cuando la aplicación se inicializa.
--	Cuando NestJS arranca la aplicación, se crea una instancia de cada controlador registrado.
--	Esta instancia se mantiene activa durante toda la vida de la aplicación.
--	Cada vez que una solicitud HTTP llega a una ruta gestionada por ese controlador, se reutiliza la misma instancia para procesar la solicitud.
+- Por defecto, los controladores en **NestJS** se comportan como singleton, lo que significa que se crea una sola instancia del controlador cuando la aplicación se inicializa.
+- Esta instancia se mantiene durante toda la vida de la aplicación y se reutiliza cada vez que llega una solicitud HTTP a una ruta gestionada por ese controlador.
 
 ##### Manejo de la solicitud
 - Cuando una solicitud HTTP llega a un endpoint gestionado por un controlador, sigue este flujo:
-  1.	Recepción de la solicitud:
-        -	Cuando el cliente (por ejemplo, un navegador o una aplicación móvil) envía una solicitud HTTP, NestJS enruta esa solicitud al controlador adecuado en función del endpoint.
-        -	El controlador tiene métodos decorados con @Get(), @Post(), etc., que están asociados a rutas específicas.
-  2.	Procesamiento de la solicitud:
-        -	El controlador llama a los servicios (que pueden haber sido inyectados en él) para manejar la lógica de negocio.
-        -	Los servicios realizan el trabajo necesario, como consultar una base de datos o aplicar reglas de negocio.
-  3.	Respuesta al cliente:
-        -	Una vez que el controlador ha recibido la información del servicio (por ejemplo, datos de usuarios), devuelve la respuesta al cliente que hizo la solicitud.
-        -	Esto podría ser una respuesta JSON, un archivo o cualquier tipo de dato que el cliente necesita.
+  1. **Recepción de la solicitud:**
+     - Cuando el cliente (por ejemplo, un navegador o una aplicación móvil) envía una solicitud HTTP, **NestJS** la dirige al controlador correspondiente según el endpoint.
+     - El controlador tiene métodos decorados con `@Get()`, `@Post()`, etc., que indican qué tipo de solicitud HTTP recibe cada método.
+  2. **Procesamiento de la solicitud:**
+     - El controlador llama a los servicios o métodos que necesita para realizar la operación solicitada por el cliente.
+     - Los servicios o métodos se encargan de realizar el trabajo necesario, como consultar una base de datos o procesar la información.
+  3. **Respuesta al cliente:**
+     - Una vez que se completan todas las operaciones solicitadas, el controlador devuelve una respuesta al cliente que realizó la solicitud.
+     - La respuesta puede ser un JSON, un archivo o cualquier otro tipo de dato.
 
 ##### Finalización de la solicitud
 - Una vez que el controlador procesa la solicitud y envía la respuesta al cliente:
