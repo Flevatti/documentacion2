@@ -1938,35 +1938,37 @@ app.enableCors((req, callback) => {
      - El controlador llama a los servicios o métodos que necesita para realizar la operación solicitada por el cliente.
      - Los servicios o métodos se encargan de realizar el trabajo necesario, como consultar una base de datos o procesar la información.
   3. **Respuesta al cliente:**
-     - Una vez que se completan todas las operaciones solicitadas, el controlador devuelve una respuesta al cliente que realizó la solicitud.
+     - Una vez que se completa la operación que solicitó el cliente, el controlador devuelve una respuesta al cliente que realizó la solicitud.
      - La respuesta puede ser un JSON, un archivo o cualquier otro tipo de dato.
 
 ##### Finalización de la solicitud
 - Una vez que el controlador procesa la solicitud y envía la respuesta al cliente:
-  -	El ciclo de vida de esa solicitud termina.
-  -	Sin embargo, el controlador sigue existiendo (si es singleton) y espera más solicitudes en el futuro.
+  - El ciclo de vida de esa solicitud termina.
+  - Sin embargo, el controlador sigue existiendo (si es singleton) y espera nuevas solicitudes en el futuro.
 
 ##### Destrucción
-- El controlador, al ser singleton, generalmente no se destruye hasta que la aplicación finaliza o se reinicia. Esto es diferente de un ciclo de vida "transitorio", donde una nueva instancia se crea y destruye para cada solicitud.
+- El controlador, al ser singleton, generalmente no se destruye hasta que la aplicación finaliza o se reinicia.
+- Esto es diferente de un ciclo de vida **transitorio**, donde se crean nuevas instancias en lugar de reutilizar siempre la misma.
 
 #### Middleware y Guards
--	Middleware: Pueden interceptar solicitudes antes de que lleguen al controlador, y tienen su propio ciclo de vida dentro de una aplicación Nest.
--	Guards: Son ejecutados antes que cualquier método de controlador para verificar permisos o autenticación, por lo que también forman parte del ciclo de vida de la solicitud.
+- **Middleware:** Pueden interceptar las solicitudes antes de que lleguen al controlador y tienen su propio ciclo de vida dentro de la aplicación.
+- **Guards:** Se ejecutan antes del método del controlador para verificar permisos o autenticación, por lo que también forman parte del ciclo de vida de la solicitud.
 
 #### Hooks
-- NestJS tiene un conjunto de eventos del ciclo de vida que permiten ejecutar código en momentos clave como el arranque o apagado de la aplicación. Estos eventos se manejan mediante métodos de gancho (hooks), que se pueden registrar en módulos, servicios (proveedores) o controladores.
-- NestJS tiene varios métodos de gancho que puedes usar para controlar estos eventos del ciclo de vida:
-  -	onModuleInit(): Se llama cuando un módulo ha sido completamente inicializado.
-  -	onModuleDestroy(): Se llama cuando un módulo está a punto de ser destruido (antes de que la aplicación se cierre).
-- Además, hay otros ganchos que pueden controlarse más específicamente al cerrar la aplicación:
-  -	beforeApplicationShutdown(): Se ejecuta justo antes de que la aplicación se apague. Aquí puedes hacer operaciones que necesiten realizarse antes de que se cierren conexiones o procesos (por ejemplo, cerrar conexiones a bases de datos).
-  -	onApplicationShutdown(): Se llama cuando la aplicación está siendo cerrada. Este método te permite ejecutar tareas finales antes de que la aplicación se termine.
-- En NestJS, los ganchos de ciclo de vida son métodos especiales que te permiten ejecutar acciones en momentos clave del ciclo de vida de una aplicación (como la inicialización o el apagado). Estos ganchos están representados por interfaces que son implementadas por clases específicas, como controladores, servicios (proveedores) o módulos.
-- Aunque en TypeScript las interfaces no existen después de la compilación (son eliminadas en el código JavaScript), implementarlas es una buena práctica por varias razones:
-  1.	Proporcionan tipado estático: Esto ayuda a detectar errores en tiempo de compilación y permite obtener sugerencias y autocompletado en el editor.
-  2.	Claridad y mantenimiento: Al implementar una interfaz, queda claro qué métodos y comportamientos se esperan de la clase que la implementa, lo que mejora la legibilidad del código.
-- Cada interfaz de ciclo de vida en NestJS te obliga a declarar el método que se va a ejecutar cuando se active el "evento" especificado. Al implementar una interfaz de ciclo de vida, te comprometes a definir el método que esa interfaz espera, lo que asegura que tu clase responderá a ese evento del ciclo de vida.
-- Por ejemplo si implementas la interfaz OnModuleInit, debes definir el método onModuleInit(), que se ejecutará cuando el módulo haya sido completamente inicializado.
+- **NestJS** tiene un conjunto de eventos del ciclo de vida que permiten ejecutar código en momentos específicos, como el inicio o el cierre de la aplicación. Estos eventos se manejan mediante métodos llamados **hooks**, que se pueden implementar en módulos, servicios (proveedores) o controladores.
+* **NestJS** tiene varios métodos que podemos utilizar para controlar estos eventos:
+  * `onModuleInit()`: Se ejecuta cuando un módulo ha sido completamente inicializado.
+  * `onModuleDestroy()`: Se ejecuta cuando un módulo está a punto de ser destruido.
+* Además, existen otros hooks relacionados específicamente con el cierre de la aplicación:
+  * `beforeApplicationShutdown()`: Se ejecuta antes de que la aplicación se cierre. Permite realizar operaciones que deben completarse antes del cierre de la aplicación.
+  * `onApplicationShutdown()`: Se ejecuta cuando la aplicación se está cerrando y permite realizar tareas finales antes de que termine.
+* En **NestJS**, estos hooks son métodos especiales que permiten ejecutar acciones en momentos específicos del ciclo de vida de la aplicación, como su inicialización o cierre.
+- **NestJS** tiene interfaces que te "obligan" a implementar estos hooks. Estas interfaces se pueden implementar en servicios, controladores o módulos.
+* Aunque las interfaces de **TypeScript** no existen después de la compilación, implementarlas es una buena práctica porque:
+  1. **Proporcionan tipado estático:** Ayudan a detectar errores durante la compilación y permiten obtener sugerencias y autocompletado en el editor.
+  2. **Mejoran la claridad y el mantenimiento:** Dejan claro qué métodos debe tener la clase y facilitan la comprensión del código.
+- Cada interfaz de ciclo de vida en **NestJS** te obliga a declarar un hook específico.
+- Por ejemplo, si implementás la interfaz `OnModuleInit`, debés definir el método `onModuleInit()`, que se ejecutará cuando el módulo haya sido completamente inicializado.
 - Ejemplo en un Servicio:
 ```js
 import { Injectable, OnModuleInit } from '@nestjs/common';
@@ -2006,24 +2008,26 @@ export class UserService  implements OnModuleInit{
 
 ```
 :::tip Observación
-- El método onModuleInit() se ejecutará automáticamente cuando el módulo al que pertenece esta clase (en este caso, UserService) haya sido completamente inicializado. Esto ocurre después de que NestJS haya creado todas las instancias de los proveedores (servicios) definidos en el módulo y haya completado la configuración inicial.
-- Esto significa que el onModuleInit() se invocará una vez que el contenedor de Nest haya terminado de construir el módulo que incluye UserService. La función se ejecuta antes de que se comiencen a manejar las solicitudes HTTP o se interactúe con otros componentes de la aplicación.
-
+- El método `onModuleInit()` se ejecutará automáticamente cuando el módulo al que pertenece esta clase (en este caso, `UserService`) haya sido completamente inicializado.
+- Esto ocurre después de que **NestJS** haya creado las instancias de los servicios, controladores, etc., del módulo y completado su configuración inicial.
 
 :::
 
 
 ## Entity
-- Las entidades(entity) son clases que representan una tabla de la BD y cada instancia puede ser una fila de esta.
-- Se utilizan para interactuar directamente con la base de datos. Cuando quieres guardar, buscar, actualizar o eliminar un registro, usas las entidades.
+- Las entidades (`Entity`) son clases que representan una tabla de la base de datos y cada instancia puede representar una fila de esa tabla.
+- Se utilizan para interactuar con la base de datos. Cuando queremos guardar, buscar, actualizar o eliminar un registro, utilizamos las entidades.
 
 #### Diferencia con DTO
+
 ##### Propósito
-- Entidades: Representan la estructura de los datos en la base de datos. Se utilizan para definir cómo se almacenan los datos.
-- DTOs: Se utilizan para enviar y recibir datos a través de la API. Sirven para validar y estructurar los datos en las solicitudes y respuestas.
-##### Interración
--	Entidades: Interactúan directamente con la base de datos (por ejemplo, realizar operaciones CRUD).
--	DTOs: Se utilizan en la capa de controlador para manejar y validar la entrada/salida de datos.
+- **Entidades:** Se utilizan para almacenar y obtener datos de la base de datos. Sirven para representar las tablas y filas de una base de datos.
+- **DTOs:** Se utilizan para enviar y recibir datos a través de la API. Sirven para validar y estructurar los datos de las solicitudes y respuestas.
+
+##### Interacción
+- **Entidades:** Interactúan directamente con la base de datos, por ejemplo, para realizar operaciones CRUD.
+- **DTOs:** Se utilizan en el controlador para validar los datos de entrada y salida.
+
 ##### Estructura y decoradores
--  Entidades: Usan decoradores de un ORM (como TypeORM) para definir la estructura de la base de datos, incluyendo columnas y relaciones.
--  DTOs: Usan decoradores de validación (como class-validator) para definir y validar la estructura de los datos que se envían y reciben, pero no tienen lógica de base de datos.
+- **Entidades:** Utilizan decoradores de un ORM (como **TypeORM**) para definir la estructura de la base de datos, incluyendo columnas y relaciones.
+- **DTOs:** Utilizan decoradores de validación (como `class-validator`) para definir y validar la estructura de los datos que se envían y reciben, pero no contienen lógica relacionada con la base de datos.

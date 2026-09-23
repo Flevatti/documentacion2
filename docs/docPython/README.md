@@ -191,8 +191,8 @@ print(y ** x)  # Potencia / (Elevar un número a una potencia) / 10 elevado a la
 
 :::tip
 - Las operaciones son casi las mismas que en otros lenguajes por lo que puede consultar en estos dos links:
-  - [JavaScript - Operadores](https://flevatti.github.io/documentacion/docs/Javascript/basico#operadores)
-  - [C# - Operadores](https://flevatti.github.io/documentacion/docs/C--/#operadores-logicos-y-relacionales)
+  - [JavaScript - Operadores](https://flevatti.github.io/guide-software-development/docs/Javascript/basico#operadores)
+  - [C# - Operadores](https://flevatti.github.io/guide-software-development/docs/CSharp#operadores-aritm%C3%A9ticos)
 
 :::
 
@@ -542,8 +542,8 @@ print(mimodulo.pi)
 
 
 #### ¿Donde buscara el módulo?
-- El primer lugar donde buscará Python cuando le indicamos que debe importar un módulo es en la carpeta local o el directorio actual de trabajo (current working directory). El directorio actual de trabajo es la ubicación desde la cual un programa es ejecutado. Por ejemplo:
-  - Si ejecutamos un archivo de Python desde la terminal, la ubicación donde esté la terminal al momento de ejecutar el archivo es el directorio actual de trabajo.
+- El primer lugar donde buscará Python cuando le indicamos que debe importar un módulo es el directorio actual de trabajo (current working directory). El directorio actual de trabajo es la ubicación desde la cual un programa es ejecutado. Por ejemplo:
+  - Si ejecutamos un archivo de Python desde la terminal, la ubicación de la terminal al momento de ejecutar el archivo es el directorio actual de trabajo.
   -  Si ejecutamos un archivo desde un editor de código (como Geany, Visual Studio Code o PyCharm), el directorio actual de trabajo por lo general es la misma carpeta donde se encuentra el archivo en cuestión.
 - Si Python no encuentra el módulo en el directorio actual de trabajo, buscará en las carpetas `Lib` y `Lib/site-packages`, que se encuentran en el directorio de instalación de Python. De modo que cualquier módulo que se encuentre dentro de alguna de esas dos carpetas podrá ser importado desde cualquier ubicación.
 
@@ -584,7 +584,7 @@ print(pi)
   import twisted.python.threadpool
   tp = twisted.python.threadpool.Threadpool()
   ```
-- Para evitar tener que indicar toda la serie de paquetes y módulos (twisted.python.threadpool) como prefijo a la clase Threadpool, seguramente sea más sencillo y cómodo decir:
+- Para evitar tener que indicar el nombre completo del módulo (`twisted.python.threadpool`) para utilizar la clase `Threadpool`, seguramente sea más sencillo:
   ```python 
   from twisted.python.threadpool import Threadpool
   tp = Threadpool()
