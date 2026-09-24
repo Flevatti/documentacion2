@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Sintaxis
+# Python / Sintaxis
 
 ## Tuplas
 - Son similares a las listas
@@ -91,8 +91,8 @@ for key,value in student.items():
 ```
 
 :::tip Observación 
-- El método `items()` devuelve todos los pares clave–valor del diccionario como un iterable de tuplas (similar a una lista), por ejemplo: `[('name', 'Alice'), ('age', 25), ('grade', 'A')]`.
-- Este `for in` recorre un iterable de tuplas, por lo que en cada iterracion `key` contiene la clave (el primer elemento de la tupla) y `value` el valor de la clave (el segundo elemento de la tupla)
+- El método `items()` mete todos los pares clave–valor del diccionario en una lista, donde cada par clave–valor es una tupla (en realidad, `items()` devuelve un view object, pero es la manera más fácil de explicarlo), por ejemplo: `[('name', 'Alice'), ('age', 25), ('grade', 'A')]`.
+- Este `for in` recorre un iterable (en este caso, el view object que se parece a una lista de tuplas). En cada iteración, `key` contiene la clave (el primer elemento de la tupla) y `value` contiene el valor de esa clave (el segundo elemento de la tupla).
 - El método `items()` devuelve un objeto especial llamado "vista" (en inglés, view object), específicamente de tipo `dict_items`. Este objeto se comporta como si fuera una lista de tuplas, donde cada tupla contiene una clave y su valor asociado. No es una copia. Es una vista en vivo del diccionario. Eso significa que si más adelante modificas el diccionario (añades, eliminas o cambias elementos), la vista se actualiza automáticamente, sin que tengas que volver a llamar a `.items()`.
 :::
 
@@ -478,8 +478,9 @@ print(mensaje)
 - También hay maneras de formatear la expresión, variable, etc., por ejemplo, para mostrar un número con una cantidad específica de decimales. Así que te invito a continuar investigando si te interesa profundizar en ello.
 :::
 
-#### % - Formato 
-- Es uno de los métodos más antiguos para interpolar cadenas en Python. Se basa en el operador `%` y en **códigos de formato** (como `%s`, `%d`, `%f`, etc.).
+
+#### % - Formato
+- Es uno de los métodos más antiguos para interpolar cadenas en Python. Se basa en el operador `%` y en especificar el tipo de dato a través de **códigos de formato** (como `%s`, `%d`, `%f`, etc.).
 - Sintaxis:
 ```python
 "Texto %tipo" % valor
@@ -491,9 +492,9 @@ print(mensaje)
     - `%f` – Flotante
     - `%.nf` – Flotante con n decimales
 - La cantidad de `%tipo` que hay en el string representa la cantidad de variables, expresiones o funciones que puedes insertar en este.
-- Cada valor que se especifica después del operador % **reemplaza** un `%tipo` del string, siguiendo un orden: el primer valor reemplaza el primer `%tipo`, el segundo valor el segundo `%tipo`, y así sucesivamente.
+- Cada valor que se especifica después del operador `%` **reemplaza** un `%tipo` del string, siguiendo un orden: el primer valor reemplaza el primer `%tipo`, el segundo valor el segundo `%tipo`, y así sucesivamente.
 - Cuando hay más de un valor, se encierran entre paréntesis:`%(valor1, valor2, ...)`.
-- Con `% - Formato`  el programador le indica a Python qué tipo de conversión hacer, en lugar de dejar que Python lo haga automáticamente como en otros métodos (por ejemplo, `f-strings` o `.format()`).
+- Con `%Formato`  el programador le indica a Python qué tipo de conversión hacer, en lugar de dejar que Python lo haga automáticamente como en otros métodos (por ejemplo, `f-strings` o `.format()`).
 :::
 - Ejemplo básico:
 ```python
@@ -539,14 +540,14 @@ print(mensaje)
 ## POO
 - La programación orientada a objetos utiliza el concepto de objetos y clases. Una clase puede considerarse como un "plano" que indica como crear objetos. Pueden tener sus propios atributos (características que poseen), y métodos (acciones que realizan).
 - Un ejemplo de clase es la clase `Dog. No pienses en un perro concreto, ni en tu propio perro. Estamos describiendo lo que un perro es y puede hacer, en general. Los perros suelen tener un nombre y edad; son propiedades de instancia. Los perros también pueden ladrar; éste es un método.
-- Cuando hablas de un perro concreto, en programación tendrías un objeto creado a partir de la clase Dog: un objeto es una instanciación de una clase. Éste es el principio básico en el que se basa la programación orientada a objetos. Así, mi perro Ozzy, por ejemplo, pertenece a la clase Dog. Sus propiedades son `nombre = 'Ozzy' y edad = '2'`. Un perro diferente tendrá atributos diferentes.
+- Cuando hablás de un perro concreto, en programación tendrías un objeto creado a partir de la clase `Dog`: un objeto es una instanciación de una clase (un objeto creado a partir de una clase). Éste es el principio básico en el que se basa la programación orientada a objetos. Así, mi perro Ozzy, por ejemplo, pertenece a la clase `Dog`. Sus propiedades son `nombre = 'Ozzy'` y `edad = '2'`. Un perro diferente tendrá atributos diferentes.
 
 
 #### Crear una clase
 - Para definir una clase en Python, puedes utilizar la palabra clave `class`, seguida del nombre de la clase y dos puntos. Dentro de la clase, hay que definir un método  `__init__` con `def`:
     - Este es el constructor que puedes utilizar después para instanciar (crear) objetos. 
     - Siempre debe recibir como primer argumento: `self`
-    - Las propiedades (atributos de instancia) se definen en `self`.
+    - Las propiedades (atributos de instancia) se definen con `self`.
 - Ejemplo:
 
 ```python
@@ -562,7 +563,7 @@ class Perro:
 :::tip Observación
 - `self` es como el `this` de `C#` o `Javascript`, contiene una referencia del objeto con el cual se accedió al método. O sea la instancia actual.
 - `self` siempre debe definirse en el contructor y en todos los metodos de instancia en el primer argumento. Es obligatorio.
-- Las propiedades se definen dentro de `self` en el constructor.  Es como si `self` fuera un `diccionario (dictionary)` y le agregas un par clave-valor, ese par equivale a una propiedad/atributo que corresponde a una instancia (objeto) creado a partir de la clase.
+- Las propiedades se definen con `self` en el constructor.  Es como si `self` fuera un `diccionario (dictionary)` y le agregas un par clave-valor, ese par equivale a una propiedad/atributo que corresponde a una instancia (objeto) creado a partir de la clase.
 - Además de `self`, que siempre debe ir como primer argumento, podemos incluir más parámetros en el constructor y en los métodos, y pasarles valores al llamarlos. 
 :::
 
@@ -616,7 +617,7 @@ mi_perro.camina(10)
 
 #### Definiendo atributos
 - A continuación vamos a añadir algunos atributos a nuestra clase. Antes de nada es importante distinguir que existen dos tipos de atributos:
-    - **Atributos de instancia**: Pertenecen a la instancia (objeto). Son atributos particulares  de cada instancia, en nuestro caso de cada perro (cada uno tiene los mismos atributos pero con diferentes valores). Se acceden mediante `nombreObjeto.nombrePropiedad`. Se crean con `self` en el constructor.
+    - **Atributos de instancia:** Cada objeto tiene sus propios atributos/propiedades independientes. Todos los objetos tienen los mismos atributos, pero pueden tener valores diferentes. Se acceden mediante `nombreObjeto.nombrePropiedad` y se crean con `self` en el constructor.
     - **Atributos de clase**: Se trata de atributos que pertenecen a la clase, por lo tanto serán comunes para todos los objetos (son atributos que tienen el mismo valor para todos los perros). Se acceden mediante `nombreClase.nombrePropiedad`.
 
 - Ejemplo:
@@ -703,33 +704,34 @@ print(type(42)) # <class 'int'>
 print(type("42")) # <class 'str'>
 ```
 :::tip Observación
-- Aunque al principio puede parecer confuso lo que se muestra en la consola, tiene sentido. Python sigue el principio de “todo es un objeto”. En Python, el tipo de un objeto corresponde a su clase. Por lo tanto, llamar a la función `type()` es equivalente a acceder al atributo `__class__`.
+- Aunque al principio puede parecer confuso lo que se muestra en la consola, tiene sentido. Python sigue el principio de “todo es un objeto”.
+- En Python, cada objeto pertenece a una clase. Por eso, `type()` nos permite conocer la clase de un objeto, al igual que `__class__`.
 :::
-- Veamos ahora el segundo uso posible de la función type(). Si se llama con tres argumentos, la función nos permite crear dinámicamente un nuevo tipo:
+- Veamos ahora el segundo uso posible de la función `type()`. Si se llama con tres argumentos, la función nos permite crear dinámicamente un nuevo tipo:
 ```python
 type(name, bases, dict)
 ```
 :::tip Observación
-- En esta forma, la función `type()` de Python funciona de forma análoga a la palabra clave `class`. El código `Type = type(“Type”, bases, dict)` equivale aproximadamente a la siguiente definición de clase:
+- Con tres argumentos, la función `type()` de Python crea una clase. El código `Type = type("Name", bases, dict)` equivale aproximadamente a la siguiente definición de clase:
     ```python
-       class <Type>(<bases>):
+       class <Name>(<bases>):
         <dict>
     ```
-- name: Nombre de la clase como string
-- bases: Es una tupla con las clases padre.
-- dict: Es un diccionario con los atributos de la nueva clase.
+- `name`: Nombre de la clase como string.
+- `bases`: Es una tupla con las clases padre.
+- `dict`: Es un diccionario con los atributos de clase y métodos de la nueva clase.
 :::
 
 
 
 #### `isinstance()`
 - La función `isinstance` recibe como argumentos un objeto y una clase y devuelve `True` si el objeto es una instancia de dicha clase o de una subclase de ella.
-- El segundo argumento (la clase) puede ser también una tupla de clases o una estructura recursiva de tuplas de clases en cuyo caso se devolverá `True` si el objeto pertenece a alguna de las clases contenidas en la estructura.
+- El segundo argumento también puede ser una tupla que contenga varias clases o incluso otras tuplas de clases. `isinstance()` devuelve `True` si el objeto pertenece a alguna de esas clases.
 - Parámetros:
-    - object: Objeto a evaluar.
-    - classinfo: Nombre de clase, tupla de nombres de clases o estructura recursiva de tuplas conteniendo nombres de clases.
+  - `object`: Objeto a evaluar.
+  - `classinfo`: Clase o tupla con varias clases.
 - Retorna:
-    - Un  `booleano`
+  - Un `booleano`.
 ##### Ejemplos
 - Podemos comprobar si el número entero 5 pertenece a la clase int con el siguiente código:
 ```python
@@ -739,12 +741,12 @@ isinstance(5, int) # True
 ```python
 isinstance(5, str)
 ```
-- El argumento classinfo puede ser una tupla de nombres de clases, devolviéndose True si el objeto analizado pertenece a alguna de ellas:
+- El argumento `classinfo` puede ser una tupla con varias clases. Devuelve `True` si el objeto pertenece a alguna de ellas:
 ```python
 isinstance(5, (int, str)) # True
 isinstance(5, (bool, str)) # False
 ```
-- También puede ser una estructura recursiva de tuplas:
+- También puede ser una tupla que contenga otras tuplas de clases:
 ```python
 isinstance(5, ((int, str), (float, bool))) # True
 isinstance(5, ((complex, str), (float, bool))) # False
@@ -773,11 +775,11 @@ if condicion:
 - En Python, `raise` se usa para lanzar  una excepción, y su equivalente en lenguajes como C#, Java o JavaScript sería `throw`.
 :::
 
-- Podemos también añadir un texto (string) en el segundo argumento que aparecerá si se lanza la excepción:
+- También podemos añadir un texto (string) como segundo argumento, que se mostrará si la condición del `assert` es falsa:
 ```python
 assert False, "El assert falló"
 ```
-- Aunque mucho cuidado, ya que la expresión anterior no es equivalente a la siguiente, siendo la misma errónea. Esto se debe a que en realidad se está evaluando `bool((False, "El assert falló"))`, lo que resulta ser siempre `True`. De hecho el siguiente código no lanzaría una excepción, cuando realmente se esperaría que lo hiciera:
+- Hay que tener cuidado, ya que la expresión anterior no es equivalente a la siguiente, que es incorrecta. Esto se debe a que `(False, "El assert falló")` se interpreta como una tupla, y una tupla siempre es `True`:
 ```python
 # INCORRECTO
 assert(False, "El assert falló")
@@ -813,12 +815,12 @@ print(mensaje)  # Salida: positivo
 
 
 ## Generadores de Python  
-- En Python, los generadores son una herramienta permiten generar secuencias de datos perezosamente.
+- En Python, los generadores son una herramienta que permite generar secuencias de datos perezosamente (generando los datos solo cuando se necesitan).
 - Piensa en los generadores como en leer un libro página por página. No necesitas arrancar todas las hojas y tenerlas esparcidas por el suelo para empezar a leer. Simplemente abres el libro, lees una página, la entiendes, y luego pasas a la siguiente. El libro “genera” cada página solo cuando la necesitas… y no ocupa más espacio del necesario.
-- La magia de los generadores reside en la palabra clave `yield`. A diferencia de `return`, que genera un único valor y sale de la función, yield genera un valor, detiene la ejecución de la función y guarda su estado. Cuando se vuelve a llamar al generador, éste retoma la operación donde la dejó. 
+- La magia de los generadores reside en la palabra clave `yield`. A diferencia de `return`, que devuelve un único valor y termina la función, `yield` devuelve un valor, pausa la función y guarda su estado. Cuando se vuelve a utilizar el generador, la función continúa desde donde se detuvo.
 
 ####  Un ejemplo básico de generador Python
-- Practiquemos un poco para hacernos a la idea. Aquí tienes una función generadora que produce los primeros n enteros:
+- Practiquemos un poco para entender cómo funcionan. Aquí tienes una función generadora que produce los primeros `n` números enteros:
 ```python
 def generate_integers(n):
     for i in range(n):
@@ -831,14 +833,14 @@ for num in generate_integers(5):
 ```
 :::tip Observación
 - La función `generate_integers` no devuelve directamente un valor, sino un **objeto generador**.
-- La primera vez que se consume/ejecuta el generador (por ejemplo, con next() o en un bucle for), la función comienza a ejecutarse hasta encontrar la primera instrucción `yield`. En ese momento, devuelve el valor indicado por `yield` (como si fuera un `return`), pausa su ejecución y guarda su estado interno (variables, posición en el código, donde quedo).
-- Cada vez que se vuelve a consumir/ejecutar el generador (segunda, tercera vez, etc.), reanuda la ejecución exactamente desde donde se quedó, continúa hasta el siguiente `yield`, devuelve ese nuevo valor y vuelve a pausarse.
-- Cuando la función termina sin encontrar más yield (por ejemplo, llega al final o ejecuta un return), el generador se agota y ya no produce más valores.
-- En resumen: los `yield` especifican los valores que se van a retornar en cada iteración (cada vez que se ejecuta/consume el generador).
+- La primera vez que se utiliza el generador (por ejemplo, con `next()` o en un bucle `for`), la función comienza a ejecutarse hasta encontrar la primera instrucción `yield`. En ese momento, devuelve el valor indicado por `yield`, pausa su ejecución y guarda su estado (en dónde se quedó y el valor de las variables, expresiones, etc. en ese momento).
+- Cada vez que se vuelve a utilizar el generador, la función continúa desde donde se quedó y sigue ejecutándose hasta encontrar el siguiente `yield`. Luego, devuelve ese nuevo valor y vuelve a pausarse.
+- Cuando la función termina y no hay más `yield` (por ejemplo, llega al final o ejecuta un `return`), el generador se agota y ya no produce más valores.
+- En resumen: los `yield` indican los valores que se devuelven en cada iteración, cada vez que se utiliza el generador.
 :::
 
 #### Sintaxis y patrones del generador de Python 
-- Los generadores pueden implementarse de múltiples formas. Dicho esto, hay dos formas principales: las funciones generadoras y las expresiones generadoras.
+- Los generadores pueden crearse de varias formas. Dicho esto, hay dos formas principales: las funciones generadoras y las expresiones generadoras.
 
 #### Funciones del generador  
 - Una función generadora se define como una función normal, pero utiliza la palabra clave `yield` en lugar de `return`. Cuando se ejecuta, devuelve un objeto generador sobre el que se puede iterar.  
@@ -856,8 +858,8 @@ for num in counter:
     print(num)
 ```
 
-####  Expresión generadora  
-- Las expresiones de generador son una forma compacta de crear generadores. 
+#### Expresión generadora
+- Las expresiones generadoras son una forma compacta de crear generadores.
 - Sintaxis:
 ```python
 (función(item) for item in iterable)

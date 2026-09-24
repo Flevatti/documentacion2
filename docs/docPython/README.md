@@ -664,7 +664,7 @@ ImportError: cannot import name 'func_a' from 'module_a' (most likely due to a c
   - Trasladar la funcionalidad compartida a un tercer archivo (por ejemplo, common.py, utils.py, o base.py)
   - Fusionar dos módulos interdependientes en uno solo, si lógicamente forman parte de la misma unidad.
 #### Utiliza importaciones locales o perezosas
-- En lugar de importar al principio de un archivo, coloca la importación dentro de la función o método que realmente la utiliza. Esto retrasa la importación hasta que se llama a la función, después de que todos los módulos hayan terminado de cargarse. Aquí tienes un ejemplo de importación perezosa dentro de un método:
+- En lugar de realizar la importación al principio del archivo, podés colocarla dentro de la función o método que la utiliza. De esta manera, la importación se realiza cuando se llama a la función. Aquí tenés un ejemplo de importación perezosa dentro de un método:
 ```Python
 # file: physics.py
 def apply_gravity(entity):
@@ -676,11 +676,11 @@ def apply_gravity(entity):
 #### Utiliza `'import module'` en lugar de `'from module import ...'`
 - Utilizar `import module` aplaza la resolución de nombres (es decir, el momento en que Python realmente busca y accede a una variable, función o clase dentro del módulo). Realiza la  resolución de nombres cuando se utiliza algo del modulo en el código durante la ejecución. Esto contrasta con la importación directa (`from module import name`), que resuelve el nombre inmediatamente al importar, es decir, antes de que el resto del módulo se haya cargado por completo.
 - Al posponer el acceso al nombre hasta el momento en que se necesita (por ejemplo, dentro de una función o más adelante en el flujo del programa), `import module` puede evitar errores causados por búsquedas anticipadas en situaciones de importaciones circulares, donde un módulo intenta acceder a un nombre que aún no ha sido definido porque el otro módulo todavía está en proceso de carga.
-- El siguiente código es un ejemplo de importación directa que provoca una búsqueda anticipada:
+- El siguiente código es un ejemplo de importación directa  que provoca una búsqueda anticipada:
 ```python
 from physics import apply_gravity  # May cause a circular import
 ```
-- Un enfoque más adecuado es posponer el momento en que accedes a un atributo de un objeto:
+- Un enfoque más adecuado es posponer el momento en que se importa un elemento del módulo:
 ```python
 import physics
 def update():
@@ -733,13 +733,13 @@ def get_player_class():
 - En esta fase, Python analiza la sintaxis: si hay errores como `print("hola"` (falta paréntesis), falla aquí.
 - No se ejecuta ninguna lógica de tu programa aún (no se llaman funciones, no se asignan variables, etc.).
 ##### Tiempo de ejecución
-- Python interpreta y ejecuta el bytecode línea por línea.
+- Python interpreta (analiza) y ejecuta el bytecode línea por línea.
 - Aquí es donde:
   - Se definen funciones y clases (¡sí, definir una función es una operación en tiempo de ejecución!)
   - Se ejecutan sentencias `import`
   - Se asignan variables
   - Se llaman funciones
-  - Se acceden a atributos como modulo.funcion.
+  - Se acceden a elementos como `modulo.funcion`.
 
 ####  Cómo ejecutar un archivo Python
 1. Asegúrate de tener Python instalado:
@@ -769,7 +769,7 @@ python /ruta/completa/a/mi_script.py
 #### Pip
 - `pip` es un sistema de gestión de paquetes para Python. Su nombre proviene de “Pip Installs Packages” o “Pip Instala Paquetes” en español.
 - Con `pip`, podemos instalar, actualizar y desinstalar paquetes de Python de manera sencilla.
-- Es el equivalente a `npm` de Node.js . La diferencia es que con `npm`, es que `npm install` instala de forma predeterminada los paquetes localmente en un proyecto, mientras que `pip install` de forma predeterminada los instala globalmente.
+- Es el equivalente de `npm` en **Python**. La diferencia es que el comando `npm install` instala los paquetes localmente en un proyecto por defecto, mientras que `pip install` los instala globalmente por defecto.
 - Con `pip` puedes instalar paquetes de Python, que son, efectivamente, código escrito por otros programadores (o comunidades) para resolver problemas comunes o proporcionar funcionalidades específicas (como hacer peticiones HTTP, trabajar con fechas, crear interfaces gráficas, manejar datos, etc.). Una vez instalado un paquete con `pip`, puedes importarlo y usarlo en tu propio proyecto. 
 
 
@@ -884,7 +884,7 @@ pip install -r requirements.txt
 pip freeze > requirements.txt
 ```
 :::tip Observación
-- `pip freeze`: Este comando muestra en la terminal una lista de todos los paquetes instalados en el entorno de Python actual, en el mismo formato que tiene el archivo `requirements.txt`.
+- `pip freeze`: Este comando muestra en la terminal una lista de todos los paquetes instalados, en el mismo formato que tiene el archivo `requirements.txt`.
 - `>`: Es un operador de redirección en la terminal que toma la salida del comando anterior (`pip freeze`) y la escribe en un archivo en lugar de mostrarla en pantalla.
 - `requirements.txt`: Es el nombre del archivo de salida. Por convención, este archivo se llama `requirements.txt` y se usa comúnmente en proyectos de Python para especificar las dependencias necesarias.
 :::
@@ -898,11 +898,11 @@ pip install -r requirements.txt --upgrade
 
 #### pip vs pip3 vs pip2
 - Tras el lanzamiento de Python 3, pip incorporó el nuevo comando `pip3`, que funciona siempre en el entorno Python 3 de tu ordenador. Lo mismo ocurre con el comando `pip2`. Por tanto, si quieres asegurarte de que pip funciona en tu entorno Python 3 o en tu entorno Python 2, utiliza los comandos pip3 o pip2, respectivamente.
-- En cambio, el comando `pip` opera en el entorno Python que sea adecuado al contexto. Esto es relevante cuando tienes tanto Python 2 como Python 3 instalados en tu ordenador. 
+- En cambio, el comando `pip` detecta el entorno de **Python** y lo ejecuta para esa versión. Esto es relevante cuando tenés tanto **Python 2** como **Python 3** instalados en tu ordenador.
 - Por ejemplo, los ordenadores MacOS dependen de Python 2 para ejecutar algunas de sus funcionalidades básicas.  Si estás trabajando en un entorno Python 2, el comando `pip` instalará, desinstalará, actualizará o gestionará paquetes Python para Python 2. Lo mismo ocurre si trabajas en un entorno Python 3. 
 
 ### Entornos virtuales de Python
-- Generalmente cuando instalamos un paquete con `pip installer`, lo hacemos a nivel sistema (global). Por lo que tendremos acceso a estos paquetes (dependencias) en cualquier parte de nuestro sistema operativo. Ya sea en documentos, descargar, imágenes etc…
+- Generalmente cuando instalamos un paquete con `pip install`, lo hacemos a nivel sistema (global). Por lo que tendremos acceso a estos paquetes (dependencias) en cualquier parte de nuestro sistema operativo. Ya sea en documentos, descargar, imágenes etc…
 - Esto puede sonar como una muy buena idea, pero la realidad es que no lo es. Ya que, en teoría, todos los proyectos son diferentes. Cada proyecto tiene su propia lista dependencias y de versiones que debe usar para poder funcionar.
 - Imagina que tienes dos aplicaciones, App1 y App2. Ambos usan el paquete Pak, pero requieren versiones diferentes. Si instala Pak versión 2.3 para App1, no podrá ejecutar App2 porque requiere la versión 3.1.
 - La solución a este problema es crear un entorno virtual, un directorio que contiene una instalación de Python de una versión en particular, además de una lista de paquetes (con sus versiones correspondiente).
@@ -919,7 +919,7 @@ pip install -r requirements.txt --upgrade
 - Gestión de dependencias: Puedes instalar y gestionar fácilmente las bibliotecas y paquetes requeridos para un proyecto específico dentro de su propio entorno virtual. Esto garantiza que todas las dependencias se mantengan bajo control y se puedan replicar fácilmente.
 
 #### Venv
-- Venv, abreviatura de entorno virtual, es un módulo que viene incluido con Python 3.3 y versiones posteriores. Está diseñado para crear entornos de Python aislados para cada proyecto. Cuando se utiliza python `-m venv myenv` , crea una carpeta llamada `'myenv'` con un nuevo intérprete de Python. Venv es liviano y parte de la biblioteca estándar, lo que significa que no necesita instalar nada adicional para usarlo. Sin embargo, es más básico y carece de algunas de las características que ofrecen las herramientas de terceros.
+- Venv, abreviatura de entorno virtual, es un módulo que viene incluido con Python 3.3 y versiones posteriores. Está diseñado para crear entornos de Python aislados para cada proyecto. Cuando se utiliza `python -m venv myenv`, crea una carpeta llamada `myenv` con un nuevo intérprete de Python. Venv es liviano y forma parte de la biblioteca estándar (la que viene con Python 3.3), por lo que no necesita instalar nada adicional para usarlo. Sin embargo, es más básico y carece de algunas de las características que ofrecen las herramientas de terceros.
 ##### Como gestionar entornos
 - Si trabajas con una versión superior a Python 3, la creación de los entornos se hace de la siguiente manera. En terminal ejecutamos el siguiente comando:
 ```powershell
@@ -927,7 +927,7 @@ python -m venv env
 ```
 :::tip
 - Esto creará una carpeta `env` en nuestro directorio de proyecto que contendrá el entorno virtual.
-- Por buenas practicas los entornos debemos nombrarlos como `env`. Si bien es cierto que podemos definir el nombre que deseemos, te recomiendo siempre seguir una convención.
+- Es una buena práctica que los entornos se nombren como `env`. Si bien podemos definir el nombre que deseemos, es recomendable seguir siempre una convención.
 :::
 - Una vez el entorno haya sido creado, lo siguiente será activarlo. La activación depende completamente del sistema operativo. Aquí los comandos que necesitas:
 
@@ -961,7 +961,8 @@ virtualenv --version
 virtualenv my-env
 ```
 :::tip Observación
-- Esto crea una carpeta en el directorio actual con el nombre del entorno (my-env/). Esta carpeta contiene los directorios para instalar módulos y ejecutables de Python.
+- Esto crea una carpeta en el directorio actual con el nombre del entorno (`my-env/`). Esta carpeta contiene los archivos necesarios para instalar y utilizar módulos de Python.
+
 :::
 
 - También puedes especificar la versión de Python con la que quieres trabajar. Simplemente usa el argumento `--python=/ruta/a/la/version/de/python`. Por ejemplo, python2.7:
@@ -977,8 +978,8 @@ pip install virtualenvwrapper
 
 
 #### Conda
-- Conda es un administrador de paquetes que viene con la distribución Anaconda de Python. Es mucho más que un simple gestor de paquetes; Puede manejar varios lenguajes y está diseñado para aplicaciones de ciencia de datos que pueden requerir dependencias complejas. Los entornos de Conda se crean mediante el comando `Conda create -n myenv python=3.8`.
-- Conda es una gestor de paquetes, dependencias y entornos para muchos lenguajes, incluido Python.
+- Conda es un administrador de paquetes que viene con **Anaconda** (una herramienta que incluye Python y muchos paquetes y herramientas para ciencia de datos). Es mucho más que un simple gestor de paquetes; puede manejar varios lenguajes y está diseñado para aplicaciones de ciencia de datos que pueden requerir dependencias complejas. Los entornos en Conda se crean mediante el comando `conda create -n myenv python=3.8`.
+- Conda es un gestor de paquetes, dependencias y entornos para muchos lenguajes, incluido Python.
 ##### Algunos comandos:
 - Para crear un entorno virtual, use:
 ```powershell
@@ -1001,7 +1002,7 @@ conda info --envs
 ## Crear un ejecutable
 - Uno de los problemas de Python es que para ejecutar un código necesitas tener instalado Python. Y no sólo eso. También necesitas instalar las dependencias como numpy, pandas o las que uses.
 - Si quieres distribuir tu código a un usuario final que no sepa de Python ni de programación, obligarle a instalar todo esto supone un problema.
-- Por suerte `pyinstaller` nos permite generar programas ejecutables. Es decir, que puedan ser ejecutados sin tener Python instalado. 
+- Por suerte, `pyinstaller` nos permite generar programas que se pueden ejecutar sin tener Python instalado.
 - `PyInstaller` es una herramienta que convierte los scripts de Python (`.py`) en ejecutables (`.exe`, `.app`, etc.) que pueden ejecutarse en máquinas que no tienen Python instalado. Este proceso de empaquetado incluye todos los archivos necesarios, como bibliotecas, módulos y recursos, dentro del ejecutable, lo que simplifica la distribución de aplicaciones.
 
 #### Características de PyInstaller
@@ -1089,7 +1090,8 @@ pyinstaller --onefile --icon=mi_icono.ico tu_script.py
 pyinstaller --onefile --hidden-import nombre_modulo tu_script.py
 ```
 ##### `--additional-hooks-dir`
-- PyInstaller utiliza scripts de "hooks" para detectar dependencias especiales en ciertos módulos. Si has creado un hook personalizado, puedes especificar su directorio con esta opción:
+- PyInstaller utiliza archivos llamados "hooks" para detectar dependencias especiales que algunos módulos necesitan.
+- Si creaste tus propios hooks, con esta opción podés indicar la carpeta donde se encuentran:
 ```powershell
 pyinstaller --onefile --additional-hooks-dir=mi_directorio_hooks tu_script.py
 ```
@@ -1098,12 +1100,12 @@ pyinstaller --onefile --additional-hooks-dir=mi_directorio_hooks tu_script.py
 :::
 
 #####  `--collect-data` y `--collect-binaries`
-- Estos parámetros se utilizan para incluir automáticamente datos o binarios de módulos específicos que PyInstaller podría no detectar.
-- `--collect-data`: Incluye archivos de datos de un módulo específico:
+- Estos parámetros se utilizan para incluir automáticamente archivos o datos de módulos específicos que PyInstaller podría no detectar.
+- `--collect-data`: Incluye automáticamente los datos de un módulo específico:
 ```powershell
  pyinstaller --collect-data nombre_modulo tu_script.py
 ```
-- `--collect-binaries`: Incluye binarios de un módulo específico.
+- `--collect-binaries`: Incluye automáticamente los archivos binarios de un módulo específico (archivos necesarios para que el módulo funcione):
 ```powershell
  pyinstaller --collect-binaries nombre_modulo tu_script.py
 ```
@@ -1122,8 +1124,9 @@ pyinstaller --onefile --upx-dir=ruta_a_upx tu_script.py
 ```powershell
 pyinstaller --onefile --key=mi_clave_secreta tu_script.py
 ```
+
 ##### `--runtime-hook`
-- Permite especificar scripts de hook que se ejecutan durante la inicialización del ejecutable, lo que puede ser útil para configurar el entorno antes de que se ejecute el script principal:
+- Permite especificar hooks (archivos) que se ejecutan al iniciar el programa (antes de ejecutar el script principal):
 
 ```powershell
 pyinstaller --onefile --runtime-hook=mi_hook.py tu_script.py
@@ -1140,7 +1143,7 @@ pyinstaller --onefile --exclude-module=tkinter tu_script.py
 ```
 
 ##### `--debug`
-- Genera un ejecutable con información adicional de depuración. Esto es útil si necesitas solucionar problemas durante la ejecución:
+- Genera un ejecutable junto con herramientas para depurarlo (probarlo). Es útil para detectar problemas durante la ejecución:
 ```powershell
 pyinstaller --onefile --debug tu_script.py
 ```
@@ -1331,7 +1334,7 @@ print_factorial(2)
 - Es como bajar una escalera:
   - Cada paso te acerca al suelo (el caso base).
   - Cuando tocas el suelo, ya no bajas más.
-  - Entonces empiezas a subir de nuevo (si hay que devolver resultados).
+  - Entonces empiezas a subir de nuevo (un paso por cada `return`).
 - El caso base es una condición que le dice a la función: “¡Hasta aquí! Ya no necesitas llamarte a ti misma. Este problema es tan simple que lo puedo resolver directamente.” 
 - Sin el caso base, estarías en un bucle infinito, por ejemplo:
   - Imagina que estás en el piso 5 de un edificio y quieres llegar al piso 0 (la planta baja).
